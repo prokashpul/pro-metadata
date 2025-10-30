@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adobe Stock Metadata Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --adobe-red: #FA0000;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Slate 50 */
+            padding-top: 4.5rem; /* Space for fixed header */
+        }
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .btn-primary {
+            background-color: var(--adobe-red);
+            transition: background-color 0.15s, transform 0.1s;
+        }
+        .btn-primary:hover {
+            background-color: #D60000;
+        }
+        .btn-primary:active {
+            transform: scale(0.99);
+        }
+        .btn-secondary {
+            background-color: #e2e8f0; /* Slate 200 */
+            color: #475569; /* Slate 600 */
+            transition: background-color 0.15s, transform 0.1s;
+        }
+        .btn-secondary:hover {
+            background-color: #cbd5e1; /* Slate 300 */
+        }
+        .file-input-label {
+            cursor: pointer;
+            border: 3px dashed #cbd5e1; /* Slate 300 - Border Re-added */
+            text-align: center;
+            border-radius: 0.75rem;
+            background-color: #fef2f2; /* Red 50 */
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+        .file-input-label:hover {
+            border-color: var(--adobe-red); /* Border color change on hover */
+            background-color: #fee2e2; /* Red 100 */
+        }
+        .copy-btn {
+            background-color: #f1f5f9; /* Slate 100 */
+            transition: background-color 0.1s;
+        }
+        .copy-btn:hover {
+            background-color: #e2e8f0; /* Slate 200 */
+        }
+        .copy-btn:active {
+            transform: scale(0.99);
+        }
+        .keyword-pill {
+            display: inline-flex;
+            padding: 0.3rem 0.75rem;
+            margin: 0.25rem;
+            background-color: #FA0000;
+            color: white;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .keyword-extra {
+             background-color: #3b82f6; /* Blue 500 for distinction */
+        }
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+        /* New Header and Modal Styles */
+        #main-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background-color: white;
+            border-bottom: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+        }
+        #apiModal {
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- FIXED HEADER -->
+    <header id="main-header" class="p-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                 <h1 class="text-2xl font-extrabold text-gray-900">
+                    <span style="color:var(--adobe-red);">Adobe Stock</span> Metadata Pro
+                </h1>
+                <span class="hidden sm:inline text-sm text-gray-500 font-medium ml-4">
+                    AI-powered batch analysis
+                </span>
+            </div>
+            
+            <button onclick="showApiModal()" 
+                class="px-4 py-2 text-sm font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-150 flex items-center space-x-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.82 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.82 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.82-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.82-3.31 2.37-2.37.996.608 2.245.54 3.14-.078z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span class="hidden sm:inline">Add APIs</span>
+                <span class="inline sm:hidden">APIs</span>
+            </button>
+        </div>
+    </header>
+
+    <div id="app" class="max-w-7xl mx-auto p-4 sm:p-8">
+        
+        <!-- Main Application Description (Moved from old header) -->
+        <header class="text-center mb-12">
+            <p class="text-xl text-gray-600 mt-3">
+                Quickly generate highly optimized metadata for your batch of stock assets.
+            </p>
+        </header>
+
+
+        <div class="grid grid-cols-1 lg:col-span-3 gap-8">
+
+            <!-- UPLOAD AND CONTROLS (Left Column) -->
+            <div class="lg:col-span-1 space-y-6">
+                <div class="card p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800 border-b pb-2">1. Upload Files</h2>
+                    
+                    <!-- File Preview Area - Simplified for multi-file display -->
+                    <div id="filePreviewContainer" class="mb-4 w-full h-24 flex flex-col items-center justify-center">
+                        <svg id="filePlaceholderIcon" class="w-10 h-10 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+                        <p id="filePreviewText" class="text-gray-600 font-semibold">No files selected.</p>
+                    </div>
+                    
+                    <div class="input-group mb-6">
+                        <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.ai,.eps,.mp4,.mov" class="hidden" onchange="handleFileChange(this)" multiple>
+                        <label for="fileInput" class="file-input-label block p-6 sm:p-10">
+                            <span class="text-lg font-semibold block mb-1" id="fileNameDisplay">Click or drag files here (Max 25)</span>
+                            <span class="text-sm text-gray-500 block">JPG, PNG, EPS, AI, MOV, MP4 supported.</span>
+                        </label>
+                    </div>
+
+                    <div class="space-y-3">
+                        <button id="analyzeBtn" onclick="generateMetadata()" 
+                            class="btn-primary w-full text-white py-3 rounded-lg font-bold flex items-center justify-center disabled:opacity-50" disabled>
+                            <svg id="spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span id="analyzeText">Generate Metadata for Batch</span>
+                        </button>
+                        
+                        <!-- New Clear Button -->
+                        <button id="clearBtn" onclick="clearAll()" 
+                            class="btn-secondary w-full py-3 rounded-lg font-bold flex items-center justify-center disabled:opacity-50" disabled>
+                            Clear All Files & Results
+                        </button>
+                        
+                    </div>
+                    <p id="analysisMethod" class="text-xs text-center text-gray-500 mt-3"></p>
+                </div>
+            </div>
+
+            <!-- METADATA OUTPUT (Right Columns) -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="card p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800 border-b pb-2">2. Generated Metadata (<span id="resultsCount">0</span> Files)</h2>
+                    
+                    <!-- Grouped Download Buttons -->
+                    <div class="flex space-x-4 mb-4"> 
+                        <button id="downloadZipBtn" onclick="createZipAndDownload()" 
+                            class="flex-1 px-4 py-2 text-sm font-semibold text-white bg-gray-600 rounded-lg hover:bg-gray-700 disabled:opacity-50 flex items-center justify-center" disabled>
+                            <svg id="zipSpinner" class="animate-spin -ml-1 mr-2 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span id="zipButtonText">Download ZIP (<span id="downloadReadyCount">0</span> files)</span>
+                        </button>
+                        
+                        <button id="downloadCsvBtn" onclick="downloadCsv()" 
+                            class="flex-1 px-4 py-2 text-sm font-semibold text-gray-800 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50" disabled>
+                            Download CSV Metadata
+                        </button>
+                    </div>
+                    
+                    <!-- Container for all results -->
+                    <div id="resultsContainer" class="space-y-4">
+                        <p id="initialOutputPlaceholder" class="text-gray-400 italic">Upload and analyze files to see results here.</p>
+                        <!-- Dynamic file results will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Status Message Box -->
+        <div id="statusMessage" class="fixed bottom-4 right-4 bg-gray-800 text-white p-3 rounded-lg shadow-xl hidden transition-opacity duration-300 opacity-0 z-50" role="alert">
+            <!-- Messages appear here -->
+        </div>
+
+    </div>
+    
+    <!-- API KEY MODAL -->
+    <div id="apiModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 invisible opacity-0">
+        <div class="card w-full max-w-lg p-6 sm:p-8 transform transition-all duration-300 scale-95">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <h3 class="text-2xl font-bold text-gray-900">Configure API Keys</h3>
+                <button onclick="hideApiModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <p class="text-sm text-gray-600 mb-4">
+                Enter your Google Gemini API key here to override the default Canvas environment key.
+            </p>
+
+            <form id="apiForm" onsubmit="saveApiKeys(event)">
+                <div class="space-y-4">
+                    <label for="geminiApiKey" class="block text-sm font-medium text-gray-700">Gemini API Key</label>
+                    <input type="text" id="geminiApiKey" name="geminiApiKey" placeholder="AIzaSy..."
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+                
+                <div id="apiStatusMessage" class="mt-4 text-xs font-medium text-center text-indigo-600">
+                    <!-- Status of the API key goes here -->
+                </div>
+
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button type="button" onclick="hideApiModal()" class="btn-secondary px-4 py-2 rounded-lg font-semibold">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition duration-150">
+                        Save Configuration
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // --- Core Application Logic & State ---
+        // The API key placeholder is left as is for the canvas environment, 
+        // but the app will now prioritize state.userApiKey if provided.
+
+        const MAX_RETRIES = 3;
+
+        const state = {
+            files: [], // Array of File objects
+            results: [], // Array of { file: File, metadata: { ... }, extras: { keywords: [], titles: [] }, status: 'pending'|'processing'|'complete'|'error', id: string, thumbnail: string }
+            maxFiles: 25,
+            userApiKey: '' // New state for user-entered key
+        };
+        
+        // Function to determine which API key to use
+        function getApiKey() {
+            // Prioritize the user-entered key. Fall back to the environment's key (which is often "").
+            return state.userApiKey || ""; 
+        }
+
+        const elements = {
+            fileInput: document.getElementById('fileInput'),
+            fileNameDisplay: document.getElementById('fileNameDisplay'),
+            analyzeBtn: document.getElementById('analyzeBtn'),
+            spinner: document.getElementById('spinner'),
+            analyzeText: document.getElementById('analyzeText'),
+            statusMessage: document.getElementById('statusMessage'),
+            filePreviewContainer: document.getElementById('filePreviewContainer'),
+            filePlaceholderIcon: document.getElementById('filePlaceholderIcon'),
+            filePreviewText: document.getElementById('filePreviewText'),
+            analysisMethod: document.getElementById('analysisMethod'),
+            resultsContainer: document.getElementById('resultsContainer'),
+            initialOutputPlaceholder: document.getElementById('initialOutputPlaceholder'),
+            resultsCount: document.getElementById('resultsCount'),
+            downloadZipBtn: document.getElementById('downloadZipBtn'),
+            downloadCsvBtn: document.getElementById('downloadCsvBtn'), 
+            downloadReadyCount: document.getElementById('downloadReadyCount'),
+            zipSpinner: document.getElementById('zipSpinner'),
+            zipButtonText: document.getElementById('zipButtonText'),
+            clearBtn: document.getElementById('clearBtn'), 
+            apiModal: document.getElementById('apiModal'),
+            geminiApiKeyInput: document.getElementById('geminiApiKey'),
+            apiStatusMessage: document.getElementById('apiStatusMessage'),
+        };
+
+        // --- API Modal Functions ---
+        window.showApiModal = function() {
+            elements.geminiApiKeyInput.value = state.userApiKey; // Load current key into input
+            elements.apiStatusMessage.textContent = state.userApiKey ? "Using custom API key." : "Using default environment key.";
+            elements.apiModal.classList.remove('invisible', 'opacity-0');
+            elements.apiModal.classList.add('opacity-100');
+        }
+
+        window.hideApiModal = function() {
+            elements.apiModal.classList.remove('opacity-100');
+            elements.apiModal.classList.add('invisible', 'opacity-0');
+        }
+
+        window.saveApiKeys = function(event) {
+            event.preventDefault();
+            const newKey = elements.geminiApiKeyInput.value.trim();
+            
+            // Basic validation
+            if (newKey && newKey.length < 20) {
+                 elements.apiStatusMessage.textContent = "Key looks too short. Please check it.";
+                 return;
+            }
+
+            state.userApiKey = newKey;
+            
+            if (newKey) {
+                 elements.apiStatusMessage.textContent = "Gemini API key saved successfully!";
+                 showStatus('Custom Gemini API key saved.', 'success');
+            } else {
+                 elements.apiStatusMessage.textContent = "Switched back to using the default environment key.";
+                 showStatus('Switched to default API key.', 'info');
+            }
+            
+            // Add a slight delay before closing the modal for feedback
+            setTimeout(hideApiModal, 1000);
+        }
+
+        // --- Utility Functions ---
+
+        /** Converts file to Base64 string (data part only) for API inline data. */
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = error => reject(error);
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        /** Converts file to Base64 Data URI (full string) for display thumbnail. */
+        function fileToDataUrl(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        /** Creates an SVG icon as a Data URI for non-image file types. */
+        function getFileIcon(extension) {
+            const defaultColor = '#5e5e5e'; 
+            let svgPath = '';
+
+            if (extension === 'video' || extension === 'mp4' || extension === 'mov') {
+                // Video icon
+                svgPath = `<path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 10h7a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2a1 1 0 011-1z" stroke="${defaultColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+            } else if (extension === 'ai' || extension === 'eps') {
+                // Vector icon (Pen tool)
+                svgPath = `<path d="M12 20h9M16.5 3.5l-3 3L8 15l-3 3 6-6 3-3 3.5-3.5a2.121 2.121 0 013 3z" stroke="${defaultColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+            } else {
+                // Generic file icon
+                svgPath = `<path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z" stroke="${defaultColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 2v7h7" stroke="${defaultColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+            }
+
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor">${svgPath}</svg>`;
+            return `data:image/svg+xml;base64,${btoa(svg)}`;
+        }
+        
+        /** Determines the best thumbnail representation (Data URI) for a given file. */
+        async function getThumbnailData(file) {
+            const extension = file.name.split('.').pop().toLowerCase();
+            const isImage = ['jpg', 'jpeg', 'png'].includes(extension);
+            const isVideo = ['mp4', 'mov'].includes(extension);
+            const isVector = ['ai', 'eps'].includes(extension);
+
+            if (isImage) {
+                // For images, return the actual data URL
+                return fileToDataUrl(file);
+            } else if (isVideo) {
+                // For videos, return the video icon
+                return getFileIcon('video');
+            } else if (isVector) {
+                // For vectors, return the vector icon
+                return getFileIcon(extension);
+            } else {
+                // Fallback for other files
+                return getFileIcon('generic');
+            }
+        }
+
+        /** Clears the file preview area and state. */
+        function clearPreview() {
+            // Reset files/results state
+            state.files = [];
+            state.results = [];
+
+            // First Column Preview Clear
+            elements.filePlaceholderIcon.classList.remove('hidden');
+            elements.filePlaceholderIcon.innerHTML = `<svg class="w-10 h-10 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>`;
+            elements.filePreviewText.textContent = 'No files selected.';
+
+            elements.analyzeText.textContent = 'Generate Metadata for Batch';
+            
+            renderOutput();
+        }
+
+        /** Handles file selection, updates state, and sets up preview. */
+        window.handleFileChange = async function(input) {
+            if (input.files.length === 0) {
+                elements.fileNameDisplay.textContent = 'Click or drag files here (Max 25)';
+                elements.analyzeBtn.disabled = true;
+                elements.clearBtn.disabled = true;
+                elements.analysisMethod.textContent = '';
+                clearPreview();
+                return;
+            }
+            
+            const selectedFiles = Array.from(input.files).slice(0, state.maxFiles);
+            state.files = selectedFiles;
+            
+            // Use Promise.all to handle multiple file readings concurrently and get thumbnails
+            const filePromises = selectedFiles.map(async (file) => ({
+                file,
+                status: 'pending',
+                // Initialize title with the file's name before AI generation
+                metadata: { title: file.name.substring(0, file.name.lastIndexOf('.')), description: 'Ready for analysis...', keywords: [] },
+                extras: { keywords: [], titles: [] }, // Initialize new extras object
+                id: crypto.randomUUID(),
+                thumbnail: await getThumbnailData(file) // Get the thumbnail/icon data
+            }));
+
+            state.results = await Promise.all(filePromises);
+
+            elements.fileNameDisplay.textContent = `${state.files.length} file(s) selected.`;
+            elements.filePreviewText.textContent = `Ready to process ${state.files.length} file(s).`;
+            elements.analyzeBtn.disabled = false;
+            elements.clearBtn.disabled = false;
+            elements.analysisMethod.textContent = `Batch mode. Processing ${state.files.length} file(s).`;
+
+            renderOutput();
+        }
+
+        /** Calls the Gemini API with structured output and backoff. */
+        async function callGeminiApiWithBackoff(payload, attempt = 0) {
+            const currentKey = getApiKey();
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${currentKey}`;
+            
+            const delay = Math.pow(2, attempt) * 1000 + Math.random() * 500;
+            if (attempt > 0) await new Promise(resolve => setTimeout(resolve, delay));
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API call failed with status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                if (result.candidates?.[0]?.finishReason === 'SAFETY') {
+                    throw new Error('Content was blocked due to safety settings.');
+                }
+                
+                return result;
+
+            } catch (error) {
+                if (attempt < MAX_RETRIES - 1) {
+                    return callGeminiApiWithBackoff(payload, attempt + 1);
+                } else {
+                    console.error("Gemini API Error after max retries:", error);
+                    throw new Error(`Failed to get a response from AI after max attempts: ${error.message}`);
+                }
+            }
+        }
+
+        /** Generates metadata for a single file item. */
+        async function generateSingleMetadata(resultItem) {
+            const file = resultItem.file;
+            const extension = file.name.split('.').pop().toLowerCase();
+            const isImage = ['jpg', 'jpeg', 'png'].includes(extension);
+            
+            // Define the new maximum length for the title (190 characters)
+            const MAX_TITLE_LENGTH = 190;
+
+            // 1. Prepare base64 data if needed
+            let base64Data = '';
+            if (isImage) {
+                try {
+                    // Use fileToBase64 (data part only) for the API call
+                    base64Data = await fileToBase64(file);
+                } catch (e) {
+                    throw new Error(`Failed to read image file: ${e.message}`);
+                }
+            }
+
+            // 2. Setup API Payload
+            const systemPrompt = "You are a world-class Adobe Stock SEO expert. Generate metadata for stock images/videos. The tags must be a list of 49 unique, high-value, commercially relevant keywords. The Title must be highly descriptive, SEO-friendly (Title Case), and between 150 and 190 characters long. The Description must be engaging and detailed (max 200 chars). Return the result only as a JSON object matching the provided schema.";
+            
+            const userQuery = `Generate Adobe Stock metadata for this asset (File Type: ${isImage ? 'Image' : extension.toUpperCase()}, Filename: ${file.name}). Focus on commercial value and searchability.`;
+
+            const metadataSchema = {
+                type: "OBJECT",
+                properties: {
+                    "title": { "type": "STRING" },
+                    "description": { "type": "STRING" },
+                    "keywords": { "type": "ARRAY", "items": { "type": "STRING" } }
+                },
+                "propertyOrdering": ["title", "description", "keywords"]
+            };
+
+            const payload = {
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: metadataSchema
+                },
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                }
+            };
+
+            if (base64Data) {
+                payload.contents = [{
+                    role: "user",
+                    parts: [
+                        { text: userQuery },
+                        { inlineData: { mimeType: file.type, data: base64Data } }
+                    ]
+                }];
+            } else {
+                payload.contents = [{ parts: [{ text: userQuery }] }];
+            }
+
+            // 3. Call API
+            const result = await callGeminiApiWithBackoff(payload);
+            const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+            if (!jsonText) {
+                throw new Error('AI response was empty or malformed.');
+            }
+
+            const parsedJson = JSON.parse(jsonText);
+
+            // 4. Update resultItem metadata
+            // Truncate title to respect the 190 character limit
+            const newTitle = parsedJson.title ? parsedJson.title.slice(0, MAX_TITLE_LENGTH) : resultItem.metadata.title;
+            resultItem.metadata.title = newTitle;
+            
+            resultItem.metadata.description = parsedJson.description ? parsedJson.description.slice(0, 200) : 'Generated Description...';
+            
+            let rawKeywords = Array.isArray(parsedJson.keywords) ? parsedJson.keywords : [];
+            rawKeywords = rawKeywords.flatMap(k => k.includes(',') ? k.split(',').map(s => s.trim()) : [k.trim()]);
+            // Ensure we limit to 49
+            resultItem.metadata.keywords = [...new Set(rawKeywords.filter(k => k.length > 0).map(k => k.toLowerCase()))].slice(0, 49);
+        }
+        
+        /** Main function to process the batch of files sequentially. */
+        window.generateMetadata = async function() {
+            if (state.files.length === 0) return;
+
+            elements.analyzeBtn.disabled = true;
+            elements.clearBtn.disabled = true; // Disable clear button during processing
+            elements.spinner.classList.remove('hidden');
+            elements.analyzeText.textContent = `Analyzing 1 of ${state.files.length}...`;
+            elements.initialOutputPlaceholder.classList.add('hidden');
+
+            for (let i = 0; i < state.files.length; i++) {
+                let resultItem = state.results[i]; // Access item by index
+                const file = resultItem.file;
+                
+                elements.analyzeText.textContent = `Analyzing ${i + 1} of ${state.files.length} (${file.name})...`;
+                resultItem.status = 'processing';
+                renderOutput(); // Update UI to show processing status
+
+                try {
+                    await generateSingleMetadata(resultItem);
+                    resultItem.status = 'complete';
+                    showStatus(`Metadata generated for ${file.name}.`, 'success');
+                } catch (error) {
+                    console.error(`Error processing ${file.name}:`, error);
+                    resultItem.status = 'error';
+                    resultItem.metadata.title = `ERROR: ${file.name}`;
+                    resultItem.metadata.description = error.message.slice(0, 190);
+                    resultItem.metadata.keywords = ['error', 'failed', 'processing'];
+                    showStatus(`Failed to generate metadata for ${file.name}.`, 'error');
+                }
+                renderOutput(); // Update UI after each file is done
+            }
+
+            // Final UI update and cleanup
+            elements.analyzeBtn.disabled = false;
+            elements.clearBtn.disabled = false; // Re-enable clear button after batch finishes
+            elements.spinner.classList.add('hidden');
+            elements.analyzeText.textContent = 'Batch Complete! Generate Again?';
+            showStatus('Batch metadata generation finished.', 'success');
+        }
+        
+        // --- NEW GEMINI FEATURES ---
+
+        /** Fetches 10 long-tail keyword suggestions. */
+        window.optimizeKeywords = async function(id) {
+            const resultItem = state.results.find(r => r.id === id);
+            if (!resultItem || resultItem.status !== 'complete') return;
+
+            const keywordsBtn = document.getElementById(`keywords-opt-btn-${id}`);
+            keywordsBtn.disabled = true;
+            keywordsBtn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Analyzing...';
+            
+            try {
+                const systemPrompt = "You are an expert Adobe Stock SEO professional. Based on the provided metadata, generate 10 unique, relevant, and commercially valuable LONG-TAIL keywords. Do NOT repeat any keywords present in the input list. Respond only with a JSON array of strings.";
+                
+                const userQuery = `Original Title: "${resultItem.metadata.title}"\nOriginal Description: "${resultItem.metadata.description}"\nExisting Keywords: ${resultItem.metadata.keywords.join(', ')}\n\nGenerate 10 new, unique, long-tail keywords for this asset.`;
+
+                const keywordSchema = {
+                    type: "OBJECT",
+                    properties: {
+                        "extra_keywords": { 
+                            "type": "ARRAY", 
+                            "items": { "type": "STRING" },
+                            "description": "10 unique long-tail keywords."
+                        }
+                    },
+                    "propertyOrdering": ["extra_keywords"]
+                };
+
+                const payload = {
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: keywordSchema
+                    },
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                    contents: [{ parts: [{ text: userQuery }] }]
+                };
+
+                const result = await callGeminiApiWithBackoff(payload);
+                const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                const parsedJson = JSON.parse(jsonText);
+                
+                let extraKeywords = Array.isArray(parsedJson.extra_keywords) ? parsedJson.extra_keywords : [];
+                extraKeywords = extraKeywords.map(k => k.trim().toLowerCase()).filter(k => k.length > 0);
+                
+                // Deduplicate against existing keywords
+                const existingKeywords = new Set(resultItem.metadata.keywords);
+                extraKeywords = extraKeywords.filter(k => !existingKeywords.has(k)).slice(0, 10);
+                
+                resultItem.extras.keywords = extraKeywords;
+                showStatus(`10 long-tail keywords suggested for ${resultItem.file.name}.`, 'success');
+
+            } catch (error) {
+                console.error("Keyword Optimization Error:", error);
+                resultItem.extras.keywords = [`Error: ${error.message.slice(0, 50)}...`];
+                showStatus(`Failed to generate long-tail keywords for ${resultItem.file.name}.`, 'error');
+            } finally {
+                keywordsBtn.disabled = false;
+                keywordsBtn.innerHTML = '✨ Get 10 Long-Tail Keywords';
+                renderOutput(); // Re-render to show new keywords
+            }
+        }
+        
+        /** Fetches 3 alternative title suggestions. */
+        window.optimizeTitles = async function(id) {
+            const resultItem = state.results.find(r => r.id === id);
+            if (!resultItem || resultItem.status !== 'complete') return;
+
+            const titlesBtn = document.getElementById(`titles-opt-btn-${id}`);
+            titlesBtn.disabled = true;
+            titlesBtn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Analyzing...';
+            
+            try {
+                const systemPrompt = "You are an expert Adobe Stock content writer. Generate three alternative titles for a stock asset: one Short (<100 chars), one Emotive, and one Trend-Focused. The titles must be in Title Case and highly descriptive. Respond only with a JSON array of objects matching the provided schema.";
+                
+                const userQuery = `Original Title: "${resultItem.metadata.title}"\nDescription: "${resultItem.metadata.description}"\n\nGenerate 3 alternative titles.`;
+
+                const titleSchema = {
+                    type: "OBJECT",
+                    properties: {
+                        "alternatives": { 
+                            "type": "ARRAY", 
+                            "items": {
+                                "type": "OBJECT",
+                                "properties": {
+                                    "type": { "type": "STRING", "description": "Short, Emotive, or Trend-Focused" },
+                                    "title": { "type": "STRING", "description": "The suggested alternative title." }
+                                }
+                            }
+                        }
+                    },
+                    "propertyOrdering": ["alternatives"]
+                };
+
+                const payload = {
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: titleSchema
+                    },
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                    contents: [{ parts: [{ text: userQuery }] }]
+                };
+
+                const result = await callGeminiApiWithBackoff(payload);
+                const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                const parsedJson = JSON.parse(jsonText);
+                
+                let alternativeTitles = Array.isArray(parsedJson.alternatives) ? parsedJson.alternatives : [];
+                
+                resultItem.extras.titles = alternativeTitles.map(item => ({
+                    type: item.type ? item.type.slice(0, 20) : 'Alternative',
+                    title: item.title ? item.title.slice(0, 190) : 'Title Suggestion'
+                }));
+
+                showStatus(`3 title alternatives suggested for ${resultItem.file.name}.`, 'success');
+
+            } catch (error) {
+                console.error("Title Optimization Error:", error);
+                resultItem.extras.titles = [{ type: 'Error', title: error.message.slice(0, 190) }];
+                showStatus(`Failed to generate title alternatives for ${resultItem.file.name}.`, 'error');
+            } finally {
+                titlesBtn.disabled = false;
+                titlesBtn.innerHTML = '✨ Suggest 3 Title Alternatives';
+                renderOutput(); // Re-render to show new titles
+            }
+        }
+        
+        /** Sanitizes a string to be a valid, friendly filename (removes special chars, replaces spaces with underscores). */
+        function sanitizeTitleForFilename(title, maxLength = 100) {
+            // 1. Replace illegal characters with empty string (keeping alphanumeric, space, dash, underscore)
+            let cleanTitle = title.replace(/[^a-zA-Z0-9\-_ ]/g, '').trim();
+            // 2. Replace spaces with underscores
+            cleanTitle = cleanTitle.replace(/ /g, '_');
+            // 3. Truncate
+            return cleanTitle.slice(0, maxLength);
+        }
+
+
+        /** Creates a ZIP file containing ONLY the original files (renamed). */
+        window.createZipAndDownload = async function() {
+            const completedResults = state.results.filter(r => r.status === 'complete');
+            if (completedResults.length === 0) {
+                showStatus('No completed files ready for download.', 'error');
+                return;
+            }
+
+            // UI feedback
+            elements.downloadZipBtn.disabled = true;
+            elements.zipSpinner.classList.remove('hidden');
+            elements.zipButtonText.textContent = 'Creating ZIP... Please wait.';
+
+            const zip = new JSZip();
+
+            try {
+                // 1. Add all completed files to the ZIP, renamed
+                await Promise.all(completedResults.map(async (item) => {
+                    const title = item.metadata.title;
+                    const extension = item.file.name.substring(item.file.name.lastIndexOf('.'));
+                    
+                    // Sanitize the AI-generated title for the filename base
+                    const cleanTitle = sanitizeTitleForFilename(title); 
+                    
+                    // Add original file (renamed: e.g., Sunny_Day_at_the_Beach.jpg)
+                    const newFileName = `${cleanTitle}${extension}`;
+                    zip.file(newFileName, item.file);
+                }));
+
+                // 2. Generate the ZIP blob
+                const zipBlob = await zip.generateAsync({ type: "blob" });
+
+                // 3. Trigger download
+                const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+                const filename = `AdobeStock_Renamed_Batch_${date}.zip`;
+                
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(zipBlob);
+                link.download = filename;
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                showStatus('ZIP download started successfully! Contains renamed assets.', 'success');
+
+            } catch (error) {
+                console.error("ZIP Creation Error:", error);
+                showStatus(`Failed to create ZIP archive: ${error.message}`, 'error');
+            } finally {
+                // Reset UI
+                elements.downloadZipBtn.disabled = false;
+                elements.zipSpinner.classList.add('hidden');
+                elements.zipButtonText.textContent = `Download ZIP (${completedResults.length} files)`;
+                renderOutput();
+            }
+        }
+
+        /** CSV utility to wrap cell content in quotes if needed. */
+        function csvEscape(value) {
+            if (value === null || value === undefined) return "";
+            let str = String(value);
+            // Replace double quotes with escaped double quotes (" becomes "")
+            str = str.replace(/"/g, '""'); 
+            // If the string contains comma, double-quote, or newline, wrap it in double quotes
+            if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                return `"${str}"`;
+            }
+            return str;
+        }
+
+        /** Creates and downloads a CSV file with metadata. */
+        window.downloadCsv = function() {
+            const completedResults = state.results.filter(r => r.status === 'complete');
+            if (completedResults.length === 0) {
+                showStatus('No completed files ready for CSV download.', 'error');
+                return;
+            }
+            
+            elements.downloadCsvBtn.disabled = true;
+
+            try {
+                // 1. Define Headers
+                const headers = ['Filename', 'Title', 'Description', 'Keywords', 'Extra Keywords']; 
+                let csvContent = headers.map(csvEscape).join(',') + '\n';
+
+                // 2. Generate Rows
+                completedResults.forEach(item => {
+                    const title = item.metadata.title;
+                    const extension = item.file.name.substring(item.file.name.lastIndexOf('.'));
+                    
+                    // Filename column must contain the NEW, generated filename.
+                    const newFileName = sanitizeTitleForFilename(title) + extension;
+                    
+                    const keywordsString = item.metadata.keywords.join(', ');
+                    const extraKeywordsString = item.extras.keywords.join(', '); // Include extra keywords
+
+                    const row = [
+                        newFileName, // The new filename/title (truncated to 100 for safety)
+                        item.metadata.title, // The full 190-character title
+                        item.metadata.description,
+                        keywordsString,
+                        extraKeywordsString // New column
+                    ];
+
+                    csvContent += row.map(csvEscape).join(',') + '\n';
+                });
+
+                // 3. Trigger Download
+                const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+                const filename = `AdobeStock_Metadata_${date}.csv`;
+                
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                
+                if (link.download !== undefined) { 
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute("href", url);
+                    link.setAttribute("download", filename);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    showStatus('CSV download started successfully!', 'success');
+                } else {
+                    showStatus('Your browser does not support CSV download.', 'error');
+                }
+            } catch (error) {
+                console.error("CSV Creation Error:", error);
+                showStatus(`Failed to create CSV file: ${error.message}`, 'error');
+            } finally {
+                elements.downloadCsvBtn.disabled = false;
+            }
+        }
+        
+        // --- CLEAR FUNCTION ---
+        window.clearAll = function() {
+            elements.fileInput.value = ''; // Reset the file input element's value
+            elements.fileNameDisplay.textContent = 'Click or drag files here (Max 25)';
+            elements.analyzeBtn.disabled = true;
+            elements.clearBtn.disabled = true;
+            elements.analysisMethod.textContent = '';
+            
+            clearPreview(); // This function resets state.files/results and calls renderOutput
+            
+            showStatus('All files and results cleared.', 'info');
+        }
+
+
+        // --- UI RENDERING AND INTERACTIONS ---
+        
+        window.toggleResult = function(id) {
+            const content = document.getElementById(`content-${id}`);
+            const icon = document.getElementById(`icon-${id}`);
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.classList.remove('rotate-180'); // Icon should point UP when open
+            } else {
+                content.classList.add('hidden');
+                icon.classList.add('rotate-180'); // Icon should point DOWN when closed
+            }
+        }
+
+        function createResultHtml(result) {
+            const { file, metadata, status, id, thumbnail, extras } = result;
+            
+            let statusText = '';
+            let statusColor = 'text-gray-500';
+            let bgColor = 'bg-gray-50'; // Default gray for pending
+
+            if (status === 'complete') {
+                statusText = 'Completed'; 
+                statusColor = 'text-green-700';
+                bgColor = 'bg-green-50';
+            } else if (status === 'processing') {
+                statusText = 'Processing...'; 
+                statusColor = 'text-yellow-700';
+                bgColor = 'bg-yellow-50';
+            } else if (status === 'pending') {
+                statusText = 'Incomplete';
+                statusColor = 'text-yellow-700';
+                bgColor = 'bg-yellow-50';
+            } else if (status === 'error') {
+                statusText = 'Error';
+                statusColor = 'text-red-700';
+                bgColor = 'bg-red-50';
+            }
+            
+            // Expanded if processing, error, or completed. Pending items remain collapsed.
+            const isExpanded = status === 'processing' || status === 'error' || status === 'complete'; 
+            
+            // Combine base keywords and extra keywords for display
+            const allKeywords = [...metadata.keywords.map(k => ({ tag: k, type: 'base' })), 
+                                 ...extras.keywords.map(k => ({ tag: k, type: 'extra' }))];
+
+            const keywordsList = allKeywords.map(item => 
+                `<span class="keyword-pill ${item.type === 'extra' ? 'keyword-extra' : ''}">${item.tag}</span>`
+            ).join('');
+
+            // Alternative Titles List HTML
+            const alternativeTitlesList = extras.titles.map(item => `
+                <div class="flex items-center space-x-2 text-sm">
+                    <span class="font-bold text-blue-600 w-28 flex-shrink-0">${item.type}:</span>
+                    <span class="text-gray-700 truncate">${item.title}</span>
+                    <button onclick="copyRawTextToClipboard('${item.title}', this)" class="copy-btn px-2 py-1 text-xs text-gray-600 rounded" title="Copy Title">
+                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3"></path></svg>
+                    </button>
+                </div>
+            `).join('');
+
+            // Thumbnail HTML block to show before file name
+            const thumbnailHtml = `
+                <img src="${thumbnail}" 
+                    alt="File thumbnail or icon" 
+                    class="w-8 h-8 object-cover rounded-md border border-gray-300 flex-shrink-0"
+                    onerror="this.onerror=null; this.src='${getFileIcon('generic')}';"
+                />
+            `;
+
+            return `
+                <div id="result-${id}" class="result-item ${bgColor} p-4 rounded-lg border border-200 shadow-sm transition-all duration-300">
+                    <div class="flex justify-between items-center cursor-pointer" onclick="toggleResult('${id}')">
+                        <div class="flex items-center space-x-3 truncate">
+                            ${thumbnailHtml} <!-- Insert thumbnail here -->
+                            <span class="font-bold text-lg text-gray-800 truncate">${file.name}</span>
+                            <span class="text-sm font-semibold ${statusColor} min-w-max">(${statusText})</span>
+                        </div>
+                        <!-- Icon points down when closed, up when open (rotate-180 is down) -->
+                        <svg class="w-5 h-5 text-gray-500 transform transition-transform ${isExpanded ? '' : 'rotate-180'}" id="icon-${id}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+
+                    <!-- Content block is hidden by default if not an error or processing -->
+                    <div id="content-${id}" class="mt-4 space-y-4 ${isExpanded ? '' : 'hidden'}">
+                        <!-- Hidden fields to hold raw text for clipboard operations -->
+                        <input type="hidden" id="title-text-${id}" value="${metadata.title.replace(/"/g, '&quot;')}" />
+                        <textarea id="desc-text-${id}" class="hidden">${metadata.description}</textarea>
+                        <textarea id="keywords-text-${id}" class="hidden">${metadata.keywords.join(', ')}</textarea>
+
+                        <!-- Title Output Display -->
+                        <div class="bg-white p-3 rounded-lg border border-gray-200">
+                            <label class="block text-xs mb-1 font-semibold text-gray-500">AI Title</label>
+                            <div class="relative">
+                                <p class="text-sm font-medium text-gray-800 pr-12">${metadata.title}</p>
+                                <button onclick="copyDynamicToClipboard('title-text-${id}', this)" class="copy-btn absolute right-0 top-0 h-full px-3 text-gray-600 rounded-r-lg" title="Copy Title">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Description Output Display -->
+                        <div class="bg-white p-3 rounded-lg border border-gray-200">
+                            <label class="block text-xs mb-1 font-semibold text-gray-500">Description</label>
+                            <div class="relative">
+                                <p class="text-sm text-gray-800 pr-12">${metadata.description}</p>
+                                <button onclick="copyDynamicToClipboard('desc-text-${id}', this)" class="copy-btn absolute right-0 top-0 h-10 w-10 text-gray-600 rounded-tr-lg" title="Copy Description">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Keywords Output Display -->
+                        <div class="bg-white p-3 rounded-lg border border-gray-200">
+                            <label class="block text-xs mb-1 font-semibold text-gray-500">Keywords List (${allKeywords.length} tags)</label>
+                            <div class="relative">
+                                <div class="text-xs text-gray-800 mb-2 max-h-20 overflow-y-auto pr-12">${keywordsList}</div>
+                                <button onclick="copyRawTextToClipboard('${allKeywords.map(k => k.tag).join(', ')}', this)" class="copy-btn absolute right-0 top-0 h-10 w-10 text-gray-600 rounded-tr-lg" title="Copy ALL Keywords">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Optimization Section (New Feature) -->
+                        <div class="pt-4 mt-4 border-t border-gray-200 space-y-3">
+                            <label class="block text-sm font-bold text-gray-800">Metadata Optimizations (Gemini LLM)</label>
+                            
+                            <button id="keywords-opt-btn-${id}" onclick="optimizeKeywords('${id}')" 
+                                class="w-full text-sm font-semibold bg-indigo-100 text-indigo-700 py-2 rounded-lg hover:bg-indigo-200 transition duration-150 disabled:opacity-50 flex items-center justify-center">
+                                ✨ Get 10 Long-Tail Keywords
+                            </button>
+
+                            <!-- Display for extra keywords -->
+                            <div id="extra-keywords-display-${id}" class="bg-white p-2 rounded-lg border border-dashed border-indigo-300 ${extras.keywords.length > 0 ? '' : 'hidden'}">
+                                <p class="text-xs font-semibold text-indigo-700 mb-1">Suggested Long-Tail Keywords:</p>
+                                <div class="text-xs">${extras.keywords.map(tag => `<span class="keyword-pill keyword-extra">${tag}</span>`).join('')}</div>
+                            </div>
+                            
+                            <button id="titles-opt-btn-${id}" onclick="optimizeTitles('${id}')" 
+                                class="w-full text-sm font-semibold bg-indigo-100 text-indigo-700 py-2 rounded-lg hover:bg-indigo-200 transition duration-150 disabled:opacity-50 flex items-center justify-center">
+                                ✨ Suggest 3 Title Alternatives
+                            </button>
+
+                            <!-- Display for alternative titles -->
+                            <div id="alt-titles-display-${id}" class="bg-white p-3 rounded-lg border border-dashed border-indigo-300 space-y-1 ${extras.titles.length > 0 ? '' : 'hidden'}">
+                                <p class="text-xs font-semibold text-indigo-700 mb-2">Alternative Title Suggestions:</p>
+                                ${alternativeTitlesList}
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderOutput() {
+            elements.resultsCount.textContent = state.files.length;
+            elements.resultsContainer.innerHTML = '';
+            
+            // Update button state based on whether files are loaded
+            elements.clearBtn.disabled = state.files.length === 0;
+
+            // Update ZIP and CSV download button state
+            const completedCount = state.results.filter(r => r.status === 'complete').length;
+            elements.downloadReadyCount.textContent = completedCount;
+            elements.downloadZipBtn.disabled = completedCount === 0;
+            elements.downloadCsvBtn.disabled = completedCount === 0;
+
+            if (state.results.length === 0) {
+                elements.initialOutputPlaceholder.classList.remove('hidden');
+            } else {
+                elements.initialOutputPlaceholder.classList.add('hidden');
+                state.results.forEach(result => {
+                    elements.resultsContainer.insertAdjacentHTML('beforeend', createResultHtml(result));
+                });
+            }
+        }
+
+        window.copyDynamicToClipboard = function(elementId, button) {
+            const element = document.getElementById(elementId);
+            const textToCopy = element.value || element.textContent;
+            
+            copyTextLogic(textToCopy, button);
+        }
+
+        window.copyRawTextToClipboard = function(textToCopy, button) {
+            copyTextLogic(textToCopy, button);
+        }
+
+        function copyTextLogic(textToCopy, button) {
+             if (!textToCopy) {
+                showStatus(`Field is empty.`, 'error');
+                return;
+            }
+            
+            // Create a temporary textarea to hold the content for copying
+            const tempTextarea = document.createElement('textarea');
+            tempTextarea.value = textToCopy;
+            tempTextarea.style.position = 'fixed'; 
+            tempTextarea.style.opacity = '0';
+            document.body.appendChild(tempTextarea);
+            
+            tempTextarea.select();
+            tempTextarea.setSelectionRange(0, 99999);
+
+            try {
+                document.execCommand('copy');
+                showStatus(`Copied to clipboard!`, 'success');
+                
+                // Add visual feedback to the button
+                button.innerHTML = `<svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+                setTimeout(() => {
+                    // Restore original icon (Copy icon)
+                    button.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3"></path></svg>`;
+                    // Restore original text for the optimization buttons if needed
+                    if(button.id && button.id.startsWith('keywords-opt-btn')) {
+                         button.innerHTML = '✨ Get 10 Long-Tail Keywords';
+                    } else if (button.id && button.id.startsWith('titles-opt-btn')) {
+                         button.innerHTML = '✨ Suggest 3 Title Alternatives';
+                    }
+                }, 1500);
+
+            } catch (err) {
+                console.error('Copy failed:', err);
+                showStatus('Copy failed. Please manually select and copy.', 'error');
+            } finally {
+                document.body.removeChild(tempTextarea);
+            }
+        }
+
+
+        function showStatus(message, type) {
+            elements.statusMessage.textContent = message;
+            elements.statusMessage.classList.remove('hidden', 'opacity-0', 'bg-red-500', 'bg-gray-800', 'bg-green-600');
+            elements.statusMessage.classList.add('opacity-100');
+            
+            if (type === 'success') {
+                elements.statusMessage.classList.add('bg-green-600');
+            } else if (type === 'error') {
+                elements.statusMessage.classList.add('bg-red-500');
+            } else {
+                elements.statusMessage.classList.add('bg-gray-800');
+            }
+
+            setTimeout(() => {
+                elements.statusMessage.classList.remove('opacity-100');
+                elements.statusMessage.classList.add('opacity-0');
+                setTimeout(() => {
+                    elements.statusMessage.classList.add('hidden');
+                }, 300);
+            }, 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderOutput();
+        });
+    </script>
+</body>
+</html>
