@@ -227,6 +227,33 @@
                     <input type="text" id="geminiApiKey" name="geminiApiKey" placeholder="AIzaSy..."
                         class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                 </div>
+
+                <!-- NEW: Multipool API Key Section -->
+                <div class="mt-6 pt-4 border-t border-gray-200">
+                    <h4 class="text-lg font-semibold text-gray-800 mb-2">Multipool API Keys</h4>
+                    <p class="text-sm text-gray-600 mb-3">Add or remove API keys for your mining pools.</p>
+                    
+                    <!-- Add Key Input Group -->
+                    <label for="multipoolApiKeyInput" class="block text-sm font-medium text-gray-700">New Multipool Key</label>
+                    <div class="mt-1 flex space-x-2">
+                        <input type="text" id="multipoolApiKeyInput" placeholder="Enter new pool key..."
+                            class="flex-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <button type="button" onclick="addMultipoolKey()"
+                            class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition duration-150">
+                            Add
+                        </button>
+                    </div>
+                    
+                    <!-- Key List -->
+                    <div id="multipoolKeyListContainer" class="mt-4">
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Saved Multipool Keys</label>
+                        <div id="multipoolKeyList" class="max-h-32 overflow-y-auto space-y-2 p-2 bg-gray-50 rounded-md border border-gray-200">
+                            <!-- Keys will be dynamically inserted here -->
+                            <p id="noMultipoolKeysText" class="text-xs text-gray-400 italic text-center py-2">No multipool keys added.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- END NEW SECTION -->
                 
                 <div id="apiStatusMessage" class="mt-4 text-xs font-medium text-center text-indigo-600">
                     <!-- Status of the API key goes here -->
@@ -251,11 +278,16 @@
 
         const MAX_RETRIES = 3;
 
+        // NEW: Define constants for local storage
+        const GEMINI_API_KEY_STORAGE = 'adobeStockPro_geminiKey';
+        const MULTIPOOL_KEYS_STORAGE = 'adobeStockPro_multipoolKeys';
+
         const state = {
             files: [], // Array of File objects
             results: [], // Array of { file: File, metadata: { ... }, extras: { keywords: [], titles: [] }, status: 'pending'|'processing'|'complete'|'error', id: string, thumbnail: string }
             maxFiles: 25,
-            userApiKey: '' // New state for user-entered key
+            userApiKey: localStorage.getItem(GEMINI_API_KEY_STORAGE) || '', // Load saved Gemini key
+            multipoolKeys: JSON.parse(localStorage.getItem(MULTIPOOL_KEYS_STORAGE) || '[]') // Load and parse saved multipool keys
         };
         
         // Function to determine which API key to use
@@ -287,12 +319,16 @@
             apiModal: document.getElementById('apiModal'),
             geminiApiKeyInput: document.getElementById('geminiApiKey'),
             apiStatusMessage: document.getElementById('apiStatusMessage'),
+            // NEW elements for multipool
+            multipoolApiKeyInput: document.getElementById('multipoolApiKeyInput'),
+            multipoolKeyList: document.getElementById('multipoolKeyList'),
         };
 
         // --- API Modal Functions ---
         window.showApiModal = function() {
             elements.geminiApiKeyInput.value = state.userApiKey; // Load current key into input
             elements.apiStatusMessage.textContent = state.userApiKey ? "Using custom API key." : "Using default environment key.";
+            renderMultipoolKeysList(); // NEW: Render the list
             elements.apiModal.classList.remove('invisible', 'opacity-0');
             elements.apiModal.classList.add('opacity-100');
         }
@@ -313,6 +349,7 @@
             }
 
             state.userApiKey = newKey;
+            localStorage.setItem(GEMINI_API_KEY_STORAGE, newKey); // Save Gemini key
             
             if (newKey) {
                  elements.apiStatusMessage.textContent = "Gemini API key saved successfully!";
@@ -324,6 +361,70 @@
             
             // Add a slight delay before closing the modal for feedback
             setTimeout(hideApiModal, 1000);
+        }
+
+        // --- NEW Multipool Key Functions ---
+
+        /** Renders the list of multipool keys in the modal. */
+        function renderMultipoolKeysList() {
+            elements.multipoolKeyList.innerHTML = ''; // Clear existing list
+            
+            if (state.multipoolKeys.length === 0) {
+                elements.multipoolKeyList.innerHTML = '<p id="noMultipoolKeysText" class="text-xs text-gray-400 italic text-center py-2">No multipool keys added.</p>';
+                return;
+            }
+            
+            state.multipoolKeys.forEach(keyItem => {
+                // Mask the key for display: show first 4 and last 4
+                const maskedKey = keyItem.key.length > 8 
+                    ? `${keyItem.key.substring(0, 4)}...${keyItem.key.substring(keyItem.key.length - 4)}` 
+                    : keyItem.key;
+
+                const keyHtml = `
+                    <div class="flex items-center justify-between bg-white p-2 rounded-md border border-gray-300">
+                        <span class="text-sm font-mono text-gray-700">${maskedKey}</span>
+                        <button type="button" onclick="removeMultipoolKey('${keyItem.id}')"
+                            class="px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-100 rounded-md transition duration-150">
+                            Remove
+                        </button>
+                    </div>
+                `;
+                elements.multipoolKeyList.insertAdjacentHTML('beforeend', keyHtml);
+            });
+        }
+
+        /** Adds a new multipool key to the state. */
+        window.addMultipoolKey = function() {
+            const newKey = elements.multipoolApiKeyInput.value.trim();
+            if (newKey.length < 5) {
+                showStatus('Multipool key appears too short.', 'error');
+                return;
+            }
+            
+            // Check for duplicates
+            if (state.multipoolKeys.some(k => k.key === newKey)) {
+                 showStatus('This multipool key has already been added.', 'error');
+                 return;
+            }
+
+            state.multipoolKeys.push({
+                id: crypto.randomUUID(),
+                key: newKey
+            });
+            
+            localStorage.setItem(MULTIPOOL_KEYS_STORAGE, JSON.stringify(state.multipoolKeys)); // Save multipool keys
+            
+            elements.multipoolApiKeyInput.value = ''; // Clear input
+            renderMultipoolKeysList(); // Re-render list
+            showStatus('Multipool key added.', 'success');
+        }
+
+        /** Removes a multipool key from the state by its ID. */
+        window.removeMultipoolKey = function(id) {
+            state.multipoolKeys = state.multipoolKeys.filter(k => k.id !== id);
+            localStorage.setItem(MULTIPOOL_KEYS_STORAGE, JSON.stringify(state.multipoolKeys)); // Save multipool keys
+            renderMultipoolKeysList(); // Re-render list
+            showStatus('Multipool key removed.', 'info');
         }
 
         // --- Utility Functions ---
@@ -1144,3 +1245,5 @@
     </script>
 </body>
 </html>
+
+
