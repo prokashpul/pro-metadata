@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adobe Stock Metadata Pro</title>
+    <title>Micro Stock Metadata Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -11,6 +11,8 @@
         :root {
             --adobe-red: #FA0000;
             --adobe-red-dark: #D60000;
+            --shutterstock-blue: #0066CC;
+            --freepik-blue: #1273EB;
         }
         
         /* Light Mode Colors */
@@ -131,8 +133,8 @@
         
         /* Preview thumbnail size */
         .preview-thumbnail {
-            width: 100px;
-            height: 100px;
+            width: 150px;
+            height: 150px;
             object-fit: cover;
             border-radius: 8px;
             border: 2px solid #e5e7eb;
@@ -142,6 +144,69 @@
         
         body.dark-mode .preview-thumbnail {
             border-color: #475569;
+        }
+        
+        /* Platform badges */
+        .platform-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin: 0.25rem;
+        }
+        
+        .platform-adobe {
+            background-color: #FEE2E2;
+            color: #991B1B;
+        }
+        
+        .platform-shutterstock {
+            background-color: #DBEAFE;
+            color: #1E40AF;
+        }
+        
+        .platform-freepik {
+            background-color: #E0E7FF;
+            color: #3730A3;
+        }
+        
+        body.dark-mode .platform-adobe {
+            background-color: #7F1D1D;
+            color: #FEE2E2;
+        }
+        
+        body.dark-mode .platform-shutterstock {
+            background-color: #1E3A8A;
+            color: #DBEAFE;
+        }
+        
+        body.dark-mode .platform-freepik {
+            background-color: #3730A3;
+            color: #E0E7FF;
+        }
+        
+        /* Platform checkbox styling */
+        .platform-checkbox {
+            appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid #cbd5e1;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .platform-checkbox:checked {
+            background-color: #6366f1;
+            border-color: #6366f1;
+            background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+        }
+        
+        body.dark-mode .platform-checkbox {
+            border-color: #475569;
+            background-color: #334155;
         }
         
         #main-header {
@@ -246,6 +311,17 @@
             letter-spacing: 0.05em;
         }
         
+        /* Character count warning styles */
+        .char-warning {
+            color: #dc2626;
+            font-weight: 600;
+        }
+        
+        .char-success {
+            color: #16a34a;
+            font-weight: 600;
+        }
+        
         /* Text color adjustments for dark mode */
         body.dark-mode .text-gray-900 {
             color: #f1f5f9 !important;
@@ -311,6 +387,7 @@
         
         /* Input fields in dark mode */
         body.dark-mode input[type="text"],
+        body.dark-mode input[type="checkbox"],
         body.dark-mode textarea {
             background-color: #334155;
             border-color: #475569;
@@ -322,6 +399,27 @@
             border-color: #6366f1;
             background-color: #1e293b;
         }
+        
+        /* Platform tabs */
+        .platform-tab {
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .platform-tab:hover {
+            background-color: #f1f5f9;
+        }
+        
+        .platform-tab.active {
+            border-bottom-color: #6366f1;
+            font-weight: 600;
+        }
+        
+        body.dark-mode .platform-tab:hover {
+            background-color: #334155;
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -331,11 +429,9 @@
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-2">
                  <h1 class="text-2xl font-extrabold text-gray-900">
-                    <span style="color:var(--adobe-red);">Adobe Stock</span> Metadata Pro
+                    <span style="color:var(--adobe-red);">MicroStock</span> Metadata Pro
                 </h1>
-                <span class="hidden sm:inline text-sm text-gray-500 font-medium ml-4">
-                    AI-powered batch analysis
-                </span>
+                
             </div>
             
             <div class="flex items-center space-x-2">
@@ -355,8 +451,8 @@
                 <button onclick="showApiModal()" 
                     class="px-4 py-2 text-sm font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-150 flex items-center space-x-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.82 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.82 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.82-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.82-3.31 2.37-2.37.996.608 2.245.54 3.14-.078z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    <span class="hidden sm:inline">Add APIs</span>
-                    <span class="inline sm:hidden">APIs</span>
+                    <span class="hidden sm:inline">API Settings</span>
+                    <span class="inline sm:hidden">API</span>
                 </button>
             </div>
         </div>
@@ -367,7 +463,7 @@
         <!-- Main Application Description -->
         <header class="text-center mb-12">
             <p class="text-xl text-gray-600 mt-3">
-                Quickly generate highly optimized metadata for your batch of stock assets.
+                Generate platform-optimized metadata for Adobe Stock, Shutterstock, and Freepik simultaneously.
             </p>
         </header>
 
@@ -391,6 +487,29 @@
                             <span class="text-lg font-semibold block mb-1 text-gray-700" id="fileNameDisplay">Click or drag files here (Max 25)</span>
                             <span class="text-sm text-gray-500 block">JPG, PNG, EPS, AI, MOV, MP4 supported.</span>
                         </label>
+                    </div>
+                    
+                    <!-- Platform Selection -->
+                    <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <h3 class="text-sm font-bold text-gray-700 mb-3">Select Target Platforms:</h3>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-3 cursor-pointer p-2 rounded hover:bg-gray-100 transition">
+                                <input type="checkbox" id="platformAdobe" class="platform-checkbox" checked onchange="updatePlatformSelection()">
+                                <span class="platform-badge platform-adobe">Adobe Stock</span>
+                                <span class="text-xs text-gray-500 ml-auto">49 keywords | Title: 150-190 chars </span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer p-2 rounded hover:bg-gray-100 transition">
+                                <input type="checkbox" id="platformShutterstock" class="platform-checkbox" checked onchange="updatePlatformSelection()">
+                                <span class="platform-badge platform-shutterstock">Shutterstock</span>
+                                <span class="text-xs text-gray-500 ml-auto">50 keywords | Title: 145-200 chars </span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer p-2 rounded hover:bg-gray-100 transition">
+                                <input type="checkbox" id="platformFreepik" class="platform-checkbox" checked onchange="updatePlatformSelection()">
+                                <span class="platform-badge platform-freepik">Freepik</span>
+                                <span class="text-xs text-gray-500 ml-auto">50 keywords | Title: 75-100 chars</span>
+                            </label>
+                        </div>
+                        <p id="platformWarning" class="text-xs text-amber-600 mt-2 hidden">⚠️ Please select at least one platform</p>
                     </div>
 
                     <div class="space-y-3">
@@ -419,19 +538,30 @@
                     <h2 class="text-2xl font-bold mb-4 text-gray-800 border-b pb-2">2. Generated Metadata (<span id="resultsCount">0</span> Files)</h2>
                     
                     <!-- Grouped Download Buttons -->
-                    <div class="flex space-x-4 mb-4"> 
-                        <button id="downloadZipBtn" onclick="createZipAndDownload()" 
-                            class="flex-1 px-4 py-2 text-sm font-semibold text-white bg-gray-600 rounded-lg hover:bg-gray-700 disabled:opacity-50 flex items-center justify-center" disabled>
-                            <svg id="zipSpinner" class="animate-spin -ml-1 mr-2 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span id="zipButtonText">Download ZIP (<span id="downloadReadyCount">0</span> files)</span>
+                    <div class="flex flex-wrap gap-2 mb-4"> 
+                        <button id="downloadZipAdobe" onclick="createZipAndDownload('adobe')" 
+                            class="flex-1 px-3 py-2 text-sm font-semibold text-white rounded-lg hover:opacity-90 disabled:opacity-50 flex items-center justify-center" 
+                            style="background-color: var(--adobe-red);" disabled>
+                            📦 Adobe Stock ZIP
                         </button>
                         
-                        <button id="downloadCsvBtn" onclick="downloadCsv()" 
-                            class="flex-1 px-4 py-2 text-sm font-semibold text-gray-800 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50" disabled>
-                            Download CSV Metadata
+                        <button id="downloadZipShutterstock" onclick="createZipAndDownload('shutterstock')" 
+                            class="flex-1 px-3 py-2 text-sm font-semibold text-white rounded-lg hover:opacity-90 disabled:opacity-50 flex items-center justify-center" 
+                            style="background-color: var(--shutterstock-blue);" disabled>
+                            📦 Shutterstock ZIP
+                        </button>
+                        
+                        <button id="downloadZipFreepik" onclick="createZipAndDownload('freepik')" 
+                            class="flex-1 px-3 py-2 text-sm font-semibold text-white rounded-lg hover:opacity-90 disabled:opacity-50 flex items-center justify-center" 
+                            style="background-color: var(--freepik-blue);" disabled>
+                            📦 Freepik ZIP
+                        </button>
+                    </div>
+                    
+                    <div class="flex gap-2 mb-4">
+                        <button id="downloadCsvAll" onclick="downloadCsv('all')" 
+                            class="flex-1 px-3 py-2 text-sm font-semibold text-gray-800 bg-white border-2 border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50" disabled>
+                            📊 Download All CSVs
                         </button>
                     </div>
                     
@@ -459,13 +589,13 @@
                 <!-- Column 1: Branding & Description -->
                 <div class="space-y-3">
                     <h3 class="text-lg font-bold text-white">
-                        <span style="color:var(--adobe-red);">Adobe Stock</span> Metadata Pro
+                        <span style="color:var(--adobe-red);">MicroStock</span> Metadata Pro
                     </h3>
                     <p class="text-sm text-gray-400">
-                        AI-powered batch metadata generation tool for professional stock content creators. Optimize your workflow with intelligent SEO suggestions.
+                        AI-powered batch metadata generation tool for Adobe Stock, Shutterstock, and Freepik. Platform-specific optimization with intelligent SEO suggestions.
                     </p>
                     <p class="text-xs text-gray-500">
-                        Version 1.0.0 | Updated 2025
+                        Version 2.0.0 | Updated 2025
                     </p>
                 </div>
 
@@ -485,24 +615,24 @@
 
                 <!-- Column 3: Links & Info -->
                 <div class="space-y-3">
-                    <h4 class="text-sm font-bold text-white uppercase tracking-wider">Resources</h4>
+                    <h4 class="text-sm font-bold text-white uppercase tracking-wider">Supported Platforms</h4>
                     <ul class="space-y-2 text-sm">
                         <li>
-                            <a href="https://stock.adobe.com" target="_blank" class="footer-link flex items-center space-x-2">
+                            <a href="https://contributor.stock.adobe.com/" target="_blank" class="footer-link flex items-center space-x-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                                 <span>Adobe Stock</span>
                             </a>
                         </li>
                         <li>
-                            <a href="https://ai.google.dev/gemini-api" target="_blank" class="footer-link flex items-center space-x-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                                <span>Gemini API Docs</span>
+                            <a href="https://www.shutterstock.com/contributor" target="_blank" class="footer-link flex items-center space-x-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                <span>Shutterstock</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#" onclick="showApiModal(); return false;" class="footer-link flex items-center space-x-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.82 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.82 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.82-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.82-3.31 2.37-2.37.996.608 2.245.54 3.14-.078z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                <span>Configure API Keys</span>
+                            <a href="https://contributor.freepik.com" target="_blank" class="footer-link flex items-center space-x-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                <span>Freepik</span>
                             </a>
                         </li>
                     </ul>
@@ -512,7 +642,7 @@
             <!-- Bottom Bar -->
             <div class="pt-6 border-t border-gray-700 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
                 <p class="text-xs text-gray-500">
-                    © 2025 Adobe Stock Metadata Pro. Not officially affiliated with Adobe Inc.
+                    © 2025 <span style="color:var(--adobe-red);">MicroStock</span> Metadata Pro. Not officially affiliated with Adobe, Shutterstock, or Freepik.
                 </p>
                 <div class="flex items-center space-x-4 text-xs text-gray-500">
                     <span class="flex items-center space-x-1">
@@ -532,14 +662,14 @@
     <div id="apiModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 invisible opacity-0">
         <div class="card w-full max-w-lg p-6 sm:p-8 transform transition-all duration-300 scale-95">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
-                <h3 class="text-2xl font-bold text-gray-900">Configure API Keys</h3>
+                <h3 class="text-2xl font-bold text-gray-900">API Settings</h3>
                 <button onclick="hideApiModal()" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
 
             <p class="text-sm text-gray-600 mb-4">
-                Enter your Google Gemini API key here to override the default Canvas environment key.
+                Enter your Google Gemini API key to enable metadata generation.
             </p>
 
             <form id="apiForm" onsubmit="saveApiKeys(event)">
@@ -547,31 +677,6 @@
                     <label for="geminiApiKey" class="block text-sm font-medium text-gray-700">Gemini API Key</label>
                     <input type="text" id="geminiApiKey" name="geminiApiKey" placeholder="AIzaSy..."
                         class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                </div>
-
-                <!-- Multipool API Key Section -->
-                <div class="mt-6 pt-4 border-t border-gray-200">
-                    <h4 class="text-lg font-semibold text-gray-800 mb-2">Multipool API Keys</h4>
-                    <p class="text-sm text-gray-600 mb-3">Add or remove API keys for your mining pools.</p>
-                    
-                    <!-- Add Key Input Group -->
-                    <label for="multipoolApiKeyInput" class="block text-sm font-medium text-gray-700">New Multipool Key</label>
-                    <div class="mt-1 flex space-x-2">
-                        <input type="text" id="multipoolApiKeyInput" placeholder="Enter new pool key..."
-                            class="flex-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                        <button type="button" onclick="addMultipoolKey()"
-                            class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition duration-150">
-                            Add
-                        </button>
-                    </div>
-                    
-                    <!-- Key List -->
-                    <div id="multipoolKeyListContainer" class="mt-4">
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Saved Multipool Keys</label>
-                        <div id="multipoolKeyList" class="max-h-32 overflow-y-auto space-y-2 p-2 bg-gray-50 rounded-md border border-gray-200">
-                            <p id="noMultipoolKeysText" class="text-xs text-gray-400 italic text-center py-2">No multipool keys added.</p>
-                        </div>
-                    </div>
                 </div>
                 
                 <div id="apiStatusMessage" class="mt-4 text-xs font-medium text-center text-indigo-600">
@@ -592,7 +697,7 @@
     
     <script>
         // --- Dark Mode Functionality ---
-        const DARK_MODE_STORAGE = 'adobeStockPro_darkMode';
+        const DARK_MODE_STORAGE = 'multiPlatformStock_darkMode';
         
         function initDarkMode() {
             const savedDarkMode = localStorage.getItem(DARK_MODE_STORAGE);
@@ -626,22 +731,83 @@
         // Initialize dark mode on page load
         initDarkMode();
         
+        // --- Platform Configuration ---
+        const PLATFORM_CONFIGS = {
+            adobe: {
+                name: 'Adobe Stock',
+                titleMax: 190,
+                titleMin: 150,
+                descMax: 200,
+                keywordsMax: 49,
+                systemPrompt: "You are a world-class Adobe Stock SEO expert. Generate metadata optimized for Adobe Stock's algorithm. Title must be 150-190 characters in Title Case (REQUIRED - strictly enforce this range). Description must be engaging (max 200 chars). Generate exactly 49 unique, high-value, commercially relevant keywords."
+            },
+            shutterstock: {
+                name: 'Shutterstock',
+                titleMax: 200,
+                titleMin: 145,
+                descMax: 200,
+                keywordsMax: 50,
+                systemPrompt: "You are a Shutterstock SEO specialist. Generate metadata optimized for Shutterstock's search algorithm. Title must be 145-200 characters in Title Case (REQUIRED - strictly enforce this range). Description must be detailed (max 200 chars). Generate exactly 50 unique, relevant keywords with mix of broad and specific terms."
+            },
+            freepik: {
+                name: 'Freepik',
+                titleMax: 100,
+                titleMin: 75,
+                descMax: 200,
+                keywordsMax: 50,
+                systemPrompt: "You are a Freepik content optimization expert. Generate metadata for Freepik's platform. Title must be 75-100 characters in Title Case (REQUIRED - strictly enforce this range). Description must be informative (max 200 chars). Generate exactly 50 unique keywords focusing on style, theme, and usage."
+            }
+        };
+        
         // --- Core Application Logic & State ---
         const MAX_RETRIES = 3;
 
-        const GEMINI_API_KEY_STORAGE = 'adobeStockPro_geminiKey';
-        const MULTIPOOL_KEYS_STORAGE = 'adobeStockPro_multipoolKeys';
+        const GEMINI_API_KEY_STORAGE = 'multiPlatformStock_geminiKey';
 
         const state = {
             files: [],
-            results: [],
+            results: [], // Each result will have metadata for multiple platforms
             maxFiles: 25,
             userApiKey: localStorage.getItem(GEMINI_API_KEY_STORAGE) || '',
-            multipoolKeys: JSON.parse(localStorage.getItem(MULTIPOOL_KEYS_STORAGE) || '[]')
+            selectedPlatforms: ['adobe', 'shutterstock', 'freepik'] // Default all selected
         };
         
         function getApiKey() {
             return state.userApiKey || ""; 
+        }
+        
+        // --- Platform Selection ---
+        window.updatePlatformSelection = function() {
+            const adobe = document.getElementById('platformAdobe').checked;
+            const shutterstock = document.getElementById('platformShutterstock').checked;
+            const freepik = document.getElementById('platformFreepik').checked;
+            
+            state.selectedPlatforms = [];
+            if (adobe) state.selectedPlatforms.push('adobe');
+            if (shutterstock) state.selectedPlatforms.push('shutterstock');
+            if (freepik) state.selectedPlatforms.push('freepik');
+            
+            const warning = document.getElementById('platformWarning');
+            if (state.selectedPlatforms.length === 0) {
+                warning.classList.remove('hidden');
+                document.getElementById('analyzeBtn').disabled = true;
+            } else {
+                warning.classList.add('hidden');
+                if (state.files.length > 0) {
+                    document.getElementById('analyzeBtn').disabled = false;
+                }
+            }
+            
+            updateDownloadButtons();
+        }
+        
+        function updateDownloadButtons() {
+            const completedCount = state.results.filter(r => r.status === 'complete').length;
+            
+            document.getElementById('downloadZipAdobe').disabled = !state.selectedPlatforms.includes('adobe') || completedCount === 0;
+            document.getElementById('downloadZipShutterstock').disabled = !state.selectedPlatforms.includes('shutterstock') || completedCount === 0;
+            document.getElementById('downloadZipFreepik').disabled = !state.selectedPlatforms.includes('freepik') || completedCount === 0;
+            document.getElementById('downloadCsvAll').disabled = completedCount === 0;
         }
 
         const elements = {
@@ -658,41 +824,50 @@
             resultsContainer: document.getElementById('resultsContainer'),
             initialOutputPlaceholder: document.getElementById('initialOutputPlaceholder'),
             resultsCount: document.getElementById('resultsCount'),
-            downloadZipBtn: document.getElementById('downloadZipBtn'),
-            downloadCsvBtn: document.getElementById('downloadCsvBtn'), 
-            downloadReadyCount: document.getElementById('downloadReadyCount'),
-            zipSpinner: document.getElementById('zipSpinner'),
-            zipButtonText: document.getElementById('zipButtonText'),
             clearBtn: document.getElementById('clearBtn'), 
             apiModal: document.getElementById('apiModal'),
             geminiApiKeyInput: document.getElementById('geminiApiKey'),
             apiStatusMessage: document.getElementById('apiStatusMessage'),
-            multipoolApiKeyInput: document.getElementById('multipoolApiKeyInput'),
-            multipoolKeyList: document.getElementById('multipoolKeyList'),
         };
 
         // --- Editable Field Functions ---
         
-        window.updateTitle = function(id, value) {
+        window.updateMetadata = function(id, platform, field, value) {
             const resultItem = state.results.find(r => r.id === id);
-            if (resultItem) {
-                resultItem.metadata.title = value;
+            if (resultItem && resultItem.platformMetadata[platform]) {
+                if (field === 'keywords') {
+                    const keywords = value.split(',').map(k => k.trim().toLowerCase()).filter(k => k.length > 0);
+                    resultItem.platformMetadata[platform].keywords = [...new Set(keywords)];
+                } else {
+                    resultItem.platformMetadata[platform][field] = value;
+                }
+                
+                // Update character count display
+                if (field === 'title') {
+                    updateCharacterCount(id, platform);
+                }
             }
         }
         
-        window.updateDescription = function(id, value) {
-            const resultItem = state.results.find(r => r.id === id);
-            if (resultItem) {
-                resultItem.metadata.description = value;
-            }
-        }
-        
-        window.updateKeywords = function(id, value) {
-            const resultItem = state.results.find(r => r.id === id);
-            if (resultItem) {
-                // Split by comma and clean up
-                const keywords = value.split(',').map(k => k.trim().toLowerCase()).filter(k => k.length > 0);
-                resultItem.metadata.keywords = [...new Set(keywords)]; // Remove duplicates
+        // Function to update character count and warning
+        function updateCharacterCount(id, platform) {
+            const config = PLATFORM_CONFIGS[platform];
+            const inputElement = document.getElementById(`title-input-${id}-${platform}`);
+            const charCountElement = document.getElementById(`char-count-${id}-${platform}`);
+            
+            if (inputElement && charCountElement) {
+                const length = inputElement.value.length;
+                const isValid = length >= config.titleMin && length <= config.titleMax;
+                
+                charCountElement.textContent = `${length}/${config.titleMax} characters (Required: ${config.titleMin}-${config.titleMax})`;
+                
+                if (isValid) {
+                    charCountElement.classList.remove('char-warning');
+                    charCountElement.classList.add('char-success');
+                } else {
+                    charCountElement.classList.remove('char-success');
+                    charCountElement.classList.add('char-warning');
+                }
             }
         }
 
@@ -700,7 +875,6 @@
         window.showApiModal = function() {
             elements.geminiApiKeyInput.value = state.userApiKey;
             elements.apiStatusMessage.textContent = state.userApiKey ? "Using custom API key." : "Using default environment key.";
-            renderMultipoolKeysList();
             elements.apiModal.classList.remove('invisible', 'opacity-0');
             elements.apiModal.classList.add('opacity-100');
         }
@@ -731,65 +905,6 @@
             }
             
             setTimeout(hideApiModal, 1000);
-        }
-
-        // --- Multipool Key Functions ---
-
-        function renderMultipoolKeysList() {
-            elements.multipoolKeyList.innerHTML = '';
-            
-            if (state.multipoolKeys.length === 0) {
-                elements.multipoolKeyList.innerHTML = '<p id="noMultipoolKeysText" class="text-xs text-gray-400 italic text-center py-2">No multipool keys added.</p>';
-                return;
-            }
-            
-            state.multipoolKeys.forEach(keyItem => {
-                const maskedKey = keyItem.key.length > 8 
-                    ? `${keyItem.key.substring(0, 4)}...${keyItem.key.substring(keyItem.key.length - 4)}` 
-                    : keyItem.key;
-
-                const keyHtml = `
-                    <div class="flex items-center justify-between bg-white p-2 rounded-md border border-gray-300">
-                        <span class="text-sm font-mono text-gray-700">${maskedKey}</span>
-                        <button type="button" onclick="removeMultipoolKey('${keyItem.id}')"
-                            class="px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-100 rounded-md transition duration-150">
-                            Remove
-                        </button>
-                    </div>
-                `;
-                elements.multipoolKeyList.insertAdjacentHTML('beforeend', keyHtml);
-            });
-        }
-
-        window.addMultipoolKey = function() {
-            const newKey = elements.multipoolApiKeyInput.value.trim();
-            if (newKey.length < 5) {
-                showStatus('Multipool key appears too short.', 'error');
-                return;
-            }
-            
-            if (state.multipoolKeys.some(k => k.key === newKey)) {
-                 showStatus('This multipool key has already been added.', 'error');
-                 return;
-            }
-
-            state.multipoolKeys.push({
-                id: crypto.randomUUID(),
-                key: newKey
-            });
-            
-            localStorage.setItem(MULTIPOOL_KEYS_STORAGE, JSON.stringify(state.multipoolKeys));
-            
-            elements.multipoolApiKeyInput.value = '';
-            renderMultipoolKeysList();
-            showStatus('Multipool key added.', 'success');
-        }
-
-        window.removeMultipoolKey = function(id) {
-            state.multipoolKeys = state.multipoolKeys.filter(k => k.id !== id);
-            localStorage.setItem(MULTIPOOL_KEYS_STORAGE, JSON.stringify(state.multipoolKeys));
-            renderMultipoolKeysList();
-            showStatus('Multipool key removed.', 'info');
         }
 
         // --- Utility Functions ---
@@ -874,26 +989,26 @@
             const filePromises = selectedFiles.map(async (file) => ({
                 file,
                 status: 'pending',
-                metadata: { title: file.name.substring(0, file.name.lastIndexOf('.')), description: 'Ready for analysis...', keywords: [] },
-                extras: { keywords: [], titles: [] },
+                platformMetadata: {}, // Will hold metadata for each platform
                 id: crypto.randomUUID(),
-                thumbnail: await getThumbnailData(file)
+                thumbnail: await getThumbnailData(file),
+                activePlatform: state.selectedPlatforms[0] || 'adobe' // Default active tab
             }));
 
             state.results = await Promise.all(filePromises);
 
             elements.fileNameDisplay.textContent = `${state.files.length} file(s) selected.`;
             elements.filePreviewText.textContent = `Ready to process ${state.files.length} file(s).`;
-            elements.analyzeBtn.disabled = false;
+            elements.analyzeBtn.disabled = state.selectedPlatforms.length === 0;
             elements.clearBtn.disabled = false;
-            elements.analysisMethod.textContent = `Batch mode. Processing ${state.files.length} file(s).`;
+            elements.analysisMethod.textContent = `Batch mode for ${state.selectedPlatforms.length} platform(s). Processing ${state.files.length} file(s).`;
 
             renderOutput();
         }
 
         async function callGeminiApiWithBackoff(payload, attempt = 0) {
             const currentKey = getApiKey();
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${currentKey}`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${currentKey}`;
             
             const delay = Math.pow(2, attempt) * 1000 + Math.random() * 500;
             if (attempt > 0) await new Promise(resolve => setTimeout(resolve, delay));
@@ -926,12 +1041,12 @@
             }
         }
 
-        async function generateSingleMetadata(resultItem) {
+        async function generatePlatformMetadata(resultItem, platform) {
             const file = resultItem.file;
             const extension = file.name.split('.').pop().toLowerCase();
             const isImage = ['jpg', 'jpeg', 'png'].includes(extension);
             
-            const MAX_TITLE_LENGTH = 190;
+            const config = PLATFORM_CONFIGS[platform];
 
             let base64Data = '';
             if (isImage) {
@@ -942,9 +1057,7 @@
                 }
             }
 
-            const systemPrompt = "You are a world-class Adobe Stock SEO expert. Generate metadata for stock images/videos. The tags must be a list of 49 unique, high-value, commercially relevant keywords. The Title must be highly descriptive, SEO-friendly (Title Case), and between 150 and 190 characters long. The Description must be engaging and detailed (max 200 chars). Return the result only as a JSON object matching the provided schema.";
-            
-            const userQuery = `Generate Adobe Stock metadata for this asset (File Type: ${isImage ? 'Image' : extension.toUpperCase()}, Filename: ${file.name}). Focus on commercial value and searchability.`;
+            const userQuery = `Generate ${config.name} metadata for this asset (File Type: ${isImage ? 'Image' : extension.toUpperCase()}, Filename: ${file.name}). Focus on commercial value and searchability specific to ${config.name}'s platform. IMPORTANT: Title MUST be between ${config.titleMin}-${config.titleMax} characters.`;
 
             const metadataSchema = {
                 type: "OBJECT",
@@ -962,7 +1075,7 @@
                     responseSchema: metadataSchema
                 },
                 systemInstruction: {
-                    parts: [{ text: systemPrompt }]
+                    parts: [{ text: config.systemPrompt }]
                 }
             };
 
@@ -987,18 +1100,29 @@
 
             const parsedJson = JSON.parse(jsonText);
 
-            const newTitle = parsedJson.title ? parsedJson.title.slice(0, MAX_TITLE_LENGTH) : resultItem.metadata.title;
-            resultItem.metadata.title = newTitle;
+            // Ensure title meets minimum length requirement
+            let title = parsedJson.title || file.name.substring(0, file.name.lastIndexOf('.'));
             
-            resultItem.metadata.description = parsedJson.description ? parsedJson.description.slice(0, 200) : 'Generated Description...';
+            // If title is too short, pad it; if too long, truncate it
+            if (title.length < config.titleMin) {
+                // Pad with descriptive text to meet minimum
+                const padding = ` - High Quality Stock Content for Commercial Use`;
+                title = (title + padding).slice(0, config.titleMax);
+            } else if (title.length > config.titleMax) {
+                title = title.slice(0, config.titleMax);
+            }
+            
+            const description = parsedJson.description ? parsedJson.description.slice(0, config.descMax) : 'Generated Description...';
             
             let rawKeywords = Array.isArray(parsedJson.keywords) ? parsedJson.keywords : [];
             rawKeywords = rawKeywords.flatMap(k => k.includes(',') ? k.split(',').map(s => s.trim()) : [k.trim()]);
-            resultItem.metadata.keywords = [...new Set(rawKeywords.filter(k => k.length > 0).map(k => k.toLowerCase()))].slice(0, 49);
+            const keywords = [...new Set(rawKeywords.filter(k => k.length > 0).map(k => k.toLowerCase()))].slice(0, config.keywordsMax);
+            
+            return { title, description, keywords };
         }
         
         window.generateMetadata = async function() {
-            if (state.files.length === 0) return;
+            if (state.files.length === 0 || state.selectedPlatforms.length === 0) return;
 
             elements.analyzeBtn.disabled = true;
             elements.clearBtn.disabled = true;
@@ -1010,20 +1134,33 @@
                 let resultItem = state.results[i];
                 const file = resultItem.file;
                 
-                elements.analyzeText.textContent = `Analyzing ${i + 1} of ${state.files.length} (${file.name})...`;
                 resultItem.status = 'processing';
                 renderOutput();
 
                 try {
-                    await generateSingleMetadata(resultItem);
+                    // Generate metadata for each selected platform
+                    for (const platform of state.selectedPlatforms) {
+                        elements.analyzeText.textContent = `Analyzing ${i + 1}/${state.files.length} - ${PLATFORM_CONFIGS[platform].name}...`;
+                        
+                        const metadata = await generatePlatformMetadata(resultItem, platform);
+                        resultItem.platformMetadata[platform] = metadata;
+                    }
+                    
                     resultItem.status = 'complete';
-                    showStatus(`Metadata generated for ${file.name}.`, 'success');
+                    showStatus(`Metadata generated for ${file.name} (${state.selectedPlatforms.length} platforms).`, 'success');
                 } catch (error) {
                     console.error(`Error processing ${file.name}:`, error);
                     resultItem.status = 'error';
-                    resultItem.metadata.title = `ERROR: ${file.name}`;
-                    resultItem.metadata.description = error.message.slice(0, 190);
-                    resultItem.metadata.keywords = ['error', 'failed', 'processing'];
+                    
+                    // Set error metadata for all selected platforms
+                    state.selectedPlatforms.forEach(platform => {
+                        resultItem.platformMetadata[platform] = {
+                            title: `ERROR: ${file.name}`,
+                            description: error.message.slice(0, 200),
+                            keywords: ['error', 'failed', 'processing']
+                        };
+                    });
+                    
                     showStatus(`Failed to generate metadata for ${file.name}.`, 'error');
                 }
                 renderOutput();
@@ -1034,129 +1171,7 @@
             elements.spinner.classList.add('hidden');
             elements.analyzeText.textContent = 'Batch Complete! Generate Again?';
             showStatus('Batch metadata generation finished.', 'success');
-        }
-        
-        // --- GEMINI FEATURES ---
-
-        window.optimizeKeywords = async function(id) {
-            const resultItem = state.results.find(r => r.id === id);
-            if (!resultItem || resultItem.status !== 'complete') return;
-
-            const keywordsBtn = document.getElementById(`keywords-opt-btn-${id}`);
-            keywordsBtn.disabled = true;
-            keywordsBtn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Analyzing...';
-            
-            try {
-                const systemPrompt = "You are an expert Adobe Stock SEO professional. Based on the provided metadata, generate 10 unique, relevant, and commercially valuable LONG-TAIL keywords. Do NOT repeat any keywords present in the input list. Respond only with a JSON array of strings.";
-                
-                const userQuery = `Original Title: "${resultItem.metadata.title}"\nOriginal Description: "${resultItem.metadata.description}"\nExisting Keywords: ${resultItem.metadata.keywords.join(', ')}\n\nGenerate 10 new, unique, long-tail keywords for this asset.`;
-
-                const keywordSchema = {
-                    type: "OBJECT",
-                    properties: {
-                        "extra_keywords": { 
-                            "type": "ARRAY", 
-                            "items": { "type": "STRING" },
-                            "description": "10 unique long-tail keywords."
-                        }
-                    },
-                    "propertyOrdering": ["extra_keywords"]
-                };
-
-                const payload = {
-                    generationConfig: {
-                        responseMimeType: "application/json",
-                        responseSchema: keywordSchema
-                    },
-                    systemInstruction: { parts: [{ text: systemPrompt }] },
-                    contents: [{ parts: [{ text: userQuery }] }]
-                };
-
-                const result = await callGeminiApiWithBackoff(payload);
-                const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-                const parsedJson = JSON.parse(jsonText);
-                
-                let extraKeywords = Array.isArray(parsedJson.extra_keywords) ? parsedJson.extra_keywords : [];
-                extraKeywords = extraKeywords.map(k => k.trim().toLowerCase()).filter(k => k.length > 0);
-                
-                const existingKeywords = new Set(resultItem.metadata.keywords);
-                extraKeywords = extraKeywords.filter(k => !existingKeywords.has(k)).slice(0, 10);
-                
-                resultItem.extras.keywords = extraKeywords;
-                showStatus(`10 long-tail keywords suggested for ${resultItem.file.name}.`, 'success');
-
-            } catch (error) {
-                console.error("Keyword Optimization Error:", error);
-                resultItem.extras.keywords = [`Error: ${error.message.slice(0, 50)}...`];
-                showStatus(`Failed to generate long-tail keywords for ${resultItem.file.name}.`, 'error');
-            } finally {
-                keywordsBtn.disabled = false;
-                keywordsBtn.innerHTML = '✨ Get 10 Long-Tail Keywords';
-                renderOutput();
-            }
-        }
-        
-        window.optimizeTitles = async function(id) {
-            const resultItem = state.results.find(r => r.id === id);
-            if (!resultItem || resultItem.status !== 'complete') return;
-
-            const titlesBtn = document.getElementById(`titles-opt-btn-${id}`);
-            titlesBtn.disabled = true;
-            titlesBtn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Analyzing...';
-            
-            try {
-                const systemPrompt = "You are an expert Adobe Stock content writer. Generate three alternative titles for a stock asset: one Short (<100 chars), one Emotive, and one Trend-Focused. The titles must be in Title Case and highly descriptive. Respond only with a JSON array of objects matching the provided schema.";
-                
-                const userQuery = `Original Title: "${resultItem.metadata.title}"\nDescription: "${resultItem.metadata.description}"\n\nGenerate 3 alternative titles.`;
-
-                const titleSchema = {
-                    type: "OBJECT",
-                    properties: {
-                        "alternatives": { 
-                            "type": "ARRAY", 
-                            "items": {
-                                "type": "OBJECT",
-                                "properties": {
-                                    "type": { "type": "STRING", "description": "Short, Emotive, or Trend-Focused" },
-                                    "title": { "type": "STRING", "description": "The suggested alternative title." }
-                                }
-                            }
-                        }
-                    },
-                    "propertyOrdering": ["alternatives"]
-                };
-
-                const payload = {
-                    generationConfig: {
-                        responseMimeType: "application/json",
-                        responseSchema: titleSchema
-                    },
-                    systemInstruction: { parts: [{ text: systemPrompt }] },
-                    contents: [{ parts: [{ text: userQuery }] }]
-                };
-
-                const result = await callGeminiApiWithBackoff(payload);
-                const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-                const parsedJson = JSON.parse(jsonText);
-                
-                let alternativeTitles = Array.isArray(parsedJson.alternatives) ? parsedJson.alternatives : [];
-                
-                resultItem.extras.titles = alternativeTitles.map(item => ({
-                    type: item.type ? item.type.slice(0, 20) : 'Alternative',
-                    title: item.title ? item.title.slice(0, 190) : 'Title Suggestion'
-                }));
-
-                showStatus(`3 title alternatives suggested for ${resultItem.file.name}.`, 'success');
-
-            } catch (error) {
-                console.error("Title Optimization Error:", error);
-                resultItem.extras.titles = [{ type: 'Error', title: error.message.slice(0, 190) }];
-                showStatus(`Failed to generate title alternatives for ${resultItem.file.name}.`, 'error');
-            } finally {
-                titlesBtn.disabled = false;
-                titlesBtn.innerHTML = '✨ Suggest 3 Title Alternatives';
-                renderOutput();
-            }
+            updateDownloadButtons();
         }
         
         function sanitizeTitleForFilename(title, maxLength = 100) {
@@ -1165,27 +1180,22 @@
             return cleanTitle.slice(0, maxLength);
         }
 
-
-        window.createZipAndDownload = async function() {
-            const completedResults = state.results.filter(r => r.status === 'complete');
+        window.createZipAndDownload = async function(platform) {
+            const completedResults = state.results.filter(r => r.status === 'complete' && r.platformMetadata[platform]);
             if (completedResults.length === 0) {
-                showStatus('No completed files ready for download.', 'error');
+                showStatus(`No completed files ready for ${PLATFORM_CONFIGS[platform].name} download.`, 'error');
                 return;
             }
-
-            elements.downloadZipBtn.disabled = true;
-            elements.zipSpinner.classList.remove('hidden');
-            elements.zipButtonText.textContent = 'Creating ZIP... Please wait.';
 
             const zip = new JSZip();
 
             try {
                 await Promise.all(completedResults.map(async (item) => {
-                    const title = item.metadata.title;
+                    const metadata = item.platformMetadata[platform];
+                    const title = metadata.title;
                     const extension = item.file.name.substring(item.file.name.lastIndexOf('.'));
                     
                     const cleanTitle = sanitizeTitleForFilename(title); 
-                    
                     const newFileName = `${cleanTitle}${extension}`;
                     zip.file(newFileName, item.file);
                 }));
@@ -1193,7 +1203,7 @@
                 const zipBlob = await zip.generateAsync({ type: "blob" });
 
                 const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-                const filename = `AdobeStock_Renamed_Batch_${date}.zip`;
+                const filename = `${PLATFORM_CONFIGS[platform].name.replace(/\s/g, '_')}_Batch_${date}.zip`;
                 
                 const link = document.createElement("a");
                 link.href = URL.createObjectURL(zipBlob);
@@ -1203,16 +1213,11 @@
                 link.click();
                 document.body.removeChild(link);
 
-                showStatus('ZIP download started successfully! Contains renamed assets.', 'success');
+                showStatus(`ZIP download started for ${PLATFORM_CONFIGS[platform].name}!`, 'success');
 
             } catch (error) {
                 console.error("ZIP Creation Error:", error);
                 showStatus(`Failed to create ZIP archive: ${error.message}`, 'error');
-            } finally {
-                elements.downloadZipBtn.disabled = false;
-                elements.zipSpinner.classList.add('hidden');
-                elements.zipButtonText.textContent = `Download ZIP (${completedResults.length} files)`;
-                renderOutput();
             }
         }
 
@@ -1226,62 +1231,59 @@
             return str;
         }
 
-        window.downloadCsv = function() {
+        window.downloadCsv = function(mode) {
             const completedResults = state.results.filter(r => r.status === 'complete');
             if (completedResults.length === 0) {
                 showStatus('No completed files ready for CSV download.', 'error');
                 return;
             }
-            
-            elements.downloadCsvBtn.disabled = true;
 
-            try {
-                const headers = ['Filename', 'Title', 'Description', 'Keywords', 'Extra Keywords']; 
-                let csvContent = headers.map(csvEscape).join(',') + '\n';
+            const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
 
-                completedResults.forEach(item => {
-                    const title = item.metadata.title;
-                    const extension = item.file.name.substring(item.file.name.lastIndexOf('.'));
+            if (mode === 'all') {
+                // Create separate CSV for each platform
+                state.selectedPlatforms.forEach(platform => {
+                    const config = PLATFORM_CONFIGS[platform];
+                    const headers = ['Filename', 'Title', 'Description', 'Keywords']; 
+                    let csvContent = headers.map(csvEscape).join(',') + '\n';
+
+                    completedResults.forEach(item => {
+                        if (item.platformMetadata[platform]) {
+                            const metadata = item.platformMetadata[platform];
+                            const title = metadata.title;
+                            const extension = item.file.name.substring(item.file.name.lastIndexOf('.'));
+                            
+                            const newFileName = sanitizeTitleForFilename(title) + extension;
+                            const keywordsString = metadata.keywords.join(', ');
+
+                            const row = [
+                                newFileName,
+                                metadata.title,
+                                metadata.description,
+                                keywordsString
+                            ];
+
+                            csvContent += row.map(csvEscape).join(',') + '\n';
+                        }
+                    });
+
+                    const filename = `${config.name.replace(/\s/g, '_')}_Metadata_${date}.csv`;
                     
-                    const newFileName = sanitizeTitleForFilename(title) + extension;
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement("a");
                     
-                    const keywordsString = item.metadata.keywords.join(', ');
-                    const extraKeywordsString = item.extras.keywords.join(', ');
-
-                    const row = [
-                        newFileName,
-                        item.metadata.title,
-                        item.metadata.description,
-                        keywordsString,
-                        extraKeywordsString
-                    ];
-
-                    csvContent += row.map(csvEscape).join(',') + '\n';
+                    if (link.download !== undefined) { 
+                        const url = URL.createObjectURL(blob);
+                        link.setAttribute("href", url);
+                        link.setAttribute("download", filename);
+                        link.style.visibility = 'hidden';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }
                 });
-
-                const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-                const filename = `AdobeStock_Metadata_${date}.csv`;
                 
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement("a");
-                
-                if (link.download !== undefined) { 
-                    const url = URL.createObjectURL(blob);
-                    link.setAttribute("href", url);
-                    link.setAttribute("download", filename);
-                    link.style.visibility = 'hidden';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    showStatus('CSV download started successfully!', 'success');
-                } else {
-                    showStatus('Your browser does not support CSV download.', 'error');
-                }
-            } catch (error) {
-                console.error("CSV Creation Error:", error);
-                showStatus(`Failed to create CSV file: ${error.message}`, 'error');
-            } finally {
-                elements.downloadCsvBtn.disabled = false;
+                showStatus(`CSV files downloaded for all ${state.selectedPlatforms.length} platforms!`, 'success');
             }
         }
         
@@ -1293,10 +1295,19 @@
             elements.analysisMethod.textContent = '';
             
             clearPreview();
+            updateDownloadButtons();
             
             showStatus('All files and results cleared.', 'info');
         }
 
+        // --- Platform Tab Switching ---
+        window.switchPlatformTab = function(id, platform) {
+            const resultItem = state.results.find(r => r.id === id);
+            if (resultItem) {
+                resultItem.activePlatform = platform;
+                renderOutput();
+            }
+        }
 
         // --- UI RENDERING AND INTERACTIONS ---
         
@@ -1313,7 +1324,7 @@
         }
 
         function createResultHtml(result) {
-            const { file, metadata, status, id, thumbnail, extras } = result;
+            const { file, platformMetadata, status, id, thumbnail, activePlatform } = result;
             
             let statusText = '';
             let statusColor = 'text-gray-500';
@@ -1339,23 +1350,6 @@
             
             const isExpanded = status === 'processing' || status === 'error' || status === 'complete'; 
             
-            const allKeywords = [...metadata.keywords.map(k => ({ tag: k, type: 'base' })), 
-                                 ...extras.keywords.map(k => ({ tag: k, type: 'extra' }))];
-
-            const keywordsList = allKeywords.map(item => 
-                `<span class="keyword-pill ${item.type === 'extra' ? 'keyword-extra' : ''}">${item.tag}</span>`
-            ).join('');
-
-            const alternativeTitlesList = extras.titles.map(item => `
-                <div class="flex items-center space-x-2 text-sm">
-                    <span class="font-bold text-blue-600 w-28 flex-shrink-0">${item.type}:</span>
-                    <span class="text-gray-700 truncate">${item.title}</span>
-                    <button onclick="copyRawTextToClipboard('${item.title.replace(/'/g, "\\'")}', this)" class="copy-btn px-2 py-1 text-xs text-gray-600 rounded" title="Copy Title">
-                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3"></path></svg>
-                    </button>
-                </div>
-            `).join('');
-
             const thumbnailHtml = `
                 <img src="${thumbnail}" 
                     alt="File thumbnail or icon" 
@@ -1363,6 +1357,27 @@
                     onerror="this.onerror=null; this.src='${getFileIcon('generic')}';"
                 />
             `;
+
+            // Platform tabs
+            const platformTabs = state.selectedPlatforms.map(platform => {
+                const isActive = platform === activePlatform;
+                const badgeClass = `platform-${platform}`;
+                return `
+                    <button onclick="switchPlatformTab('${id}', '${platform}')" 
+                        class="platform-tab ${isActive ? 'active' : ''} flex-1">
+                        <span class="platform-badge ${badgeClass}">${PLATFORM_CONFIGS[platform].name}</span>
+                    </button>
+                `;
+            }).join('');
+
+            // Get active platform metadata
+            const activeMetadata = platformMetadata[activePlatform] || { title: '', description: '', keywords: [] };
+            const config = PLATFORM_CONFIGS[activePlatform] || PLATFORM_CONFIGS.adobe;
+            
+            // Check if title meets requirements
+            const titleLength = activeMetadata.title.length;
+            const isTitleValid = titleLength >= config.titleMin && titleLength <= config.titleMax;
+            const charCountClass = isTitleValid ? 'char-success' : 'char-warning';
 
             return `
                 <div id="result-${id}" class="result-item ${bgColor} p-4 rounded-lg border border-200 shadow-sm transition-all duration-300">
@@ -1372,108 +1387,97 @@
                             <div class="flex-1 min-w-0">
                                 <span class="font-bold text-lg text-gray-800 block truncate">${file.name}</span>
                                 <span class="text-sm font-semibold ${statusColor} block mt-1">${statusText}</span>
+                                ${state.selectedPlatforms.length > 0 ? `
+                                    <div class="flex flex-wrap gap-1 mt-2">
+                                        ${state.selectedPlatforms.map(p => `<span class="platform-badge platform-${p} text-xs">${PLATFORM_CONFIGS[p].name}</span>`).join('')}
+                                    </div>
+                                ` : ''}
                             </div>
                         </div>
                         <svg class="w-5 h-5 text-gray-500 transform transition-transform flex-shrink-0 ml-2 ${isExpanded ? '' : 'rotate-180'}" id="icon-${id}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
 
                     <div id="content-${id}" class="mt-4 space-y-4 ${isExpanded ? '' : 'hidden'}">
+                        
+                        ${state.selectedPlatforms.length > 1 ? `
+                            <!-- Platform Tabs -->
+                            <div class="flex border-b border-gray-200">
+                                ${platformTabs}
+                            </div>
+                        ` : ''}
+
                         <!-- Editable Title -->
                         <div class="bg-white p-3 rounded-lg border border-gray-200">
                             <div class="flex justify-between items-center mb-1">
-                                <label class="block text-xs font-semibold text-gray-500">AI Title</label>
+                                <label class="block text-xs font-semibold text-gray-500">Title for ${config.name} </label>
                                 <span class="edit-indicator">✎ Editable</span>
                             </div>
                             <div class="relative">
                                 <input 
                                     type="text" 
-                                    id="title-input-${id}" 
-                                    value="${metadata.title.replace(/"/g, '&quot;')}"
-                                    onchange="updateTitle('${id}', this.value)"
+                                    id="title-input-${id}-${activePlatform}" 
+                                    value="${activeMetadata.title.replace(/"/g, '&quot;')}"
+                                    oninput="updateMetadata('${id}', '${activePlatform}', 'title', this.value)"
                                     class="editable-input w-full text-sm font-medium text-gray-800 pr-12 px-2 py-1 border border-gray-200 rounded focus:ring-2 focus:ring-indigo-500"
-                                    maxlength="190"
+                                    maxlength="${config.titleMax}"
                                 />
-                                <button onclick="copyDynamicToClipboard('title-input-${id}', this)" class="copy-btn absolute right-0 top-0 h-full px-3 text-gray-600 rounded-r-lg" title="Copy Title">
+                                <button onclick="copyDynamicToClipboard('title-input-${id}-${activePlatform}', this)" class="copy-btn absolute right-0 top-0 h-full px-3 text-gray-600 rounded-r-lg" title="Copy Title">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3"></path></svg>
                                 </button>
                             </div>
-                            <p class="text-xs text-gray-400 mt-1">${metadata.title.length}/190 characters</p>
+                            <p id="char-count-${id}-${activePlatform}" class="text-xs mt-1 ${charCountClass}">${titleLength}/${config.titleMax} characters (Required: ${config.titleMin}-${config.titleMax})</p>
                         </div>
 
                         <!-- Editable Description -->
                         <div class="bg-white p-3 rounded-lg border border-gray-200">
                             <div class="flex justify-between items-center mb-1">
-                                <label class="block text-xs font-semibold text-gray-500">Description</label>
+                                <label class="block text-xs font-semibold text-gray-500">Description for ${config.name}</label>
                                 <span class="edit-indicator">✎ Editable</span>
                             </div>
                             <div class="relative">
                                 <textarea 
-                                    id="desc-input-${id}"
-                                    onchange="updateDescription('${id}', this.value)"
+                                    id="desc-input-${id}-${activePlatform}"
+                                    onchange="updateMetadata('${id}', '${activePlatform}', 'description', this.value)"
                                     class="editable-textarea w-full text-sm text-gray-800 pr-12 px-2 py-1 border border-gray-200 rounded resize-none focus:ring-2 focus:ring-indigo-500"
                                     rows="2"
-                                    maxlength="200"
-                                >${metadata.description}</textarea>
-                                <button onclick="copyDynamicToClipboard('desc-input-${id}', this)" class="copy-btn absolute right-0 top-0 h-10 w-10 text-gray-600 rounded-tr-lg" title="Copy Description">
+                                    maxlength="${config.descMax}"
+                                >${activeMetadata.description}</textarea>
+                                <button onclick="copyDynamicToClipboard('desc-input-${id}-${activePlatform}', this)" class="copy-btn absolute right-0 top-0 h-10 w-10 text-gray-600 rounded-tr-lg" title="Copy Description">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3"></path></svg>
                                 </button>
                             </div>
-                            <p class="text-xs text-gray-400 mt-1">${metadata.description.length}/200 characters</p>
+                            <p class="text-xs text-gray-400 mt-1">${activeMetadata.description.length}/${config.descMax} characters</p>
                         </div>
 
                         <!-- Editable Keywords -->
                         <div class="bg-white p-3 rounded-lg border border-gray-200">
                             <div class="flex justify-between items-center mb-1">
-                                <label class="block text-xs font-semibold text-gray-500">Keywords (${metadata.keywords.length} base tags)</label>
+                                <label class="block text-xs font-semibold text-gray-500">Keywords for ${config.name} (${activeMetadata.keywords.length}/${config.keywordsMax})</label>
                                 <span class="edit-indicator">✎ Editable</span>
                             </div>
                             <div class="relative">
                                 <textarea 
-                                    id="keywords-input-${id}"
-                                    onchange="updateKeywords('${id}', this.value)"
+                                    id="keywords-input-${id}-${activePlatform}"
+                                    onchange="updateMetadata('${id}', '${activePlatform}', 'keywords', this.value)"
                                     class="editable-textarea w-full text-sm text-gray-800 pr-12 px-2 py-1 border border-gray-200 rounded resize-none focus:ring-2 focus:ring-indigo-500"
                                     rows="3"
                                     placeholder="Enter keywords separated by commas"
-                                >${metadata.keywords.join(', ')}</textarea>
-                                <button onclick="copyDynamicToClipboard('keywords-input-${id}', this)" class="copy-btn absolute right-0 top-0 h-10 w-10 text-gray-600 rounded-tr-lg" title="Copy Keywords">
+                                >${activeMetadata.keywords.join(', ')}</textarea>
+                                <button onclick="copyDynamicToClipboard('keywords-input-${id}-${activePlatform}', this)" class="copy-btn absolute right-0 top-0 h-10 w-10 text-gray-600 rounded-tr-lg" title="Copy Keywords">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3"></path></svg>
                                 </button>
                             </div>
                             <p class="text-xs text-gray-400 mt-1">Comma-separated tags</p>
                             
                             <!-- Visual keyword pills display -->
-                            ${allKeywords.length > 0 ? `
+                            ${activeMetadata.keywords.length > 0 ? `
                                 <div class="mt-2 pt-2 border-t border-gray-100">
-                                    <p class="text-xs text-gray-500 mb-1">Preview (${allKeywords.length} total):</p>
-                                    <div class="text-xs max-h-20 overflow-y-auto">${keywordsList}</div>
+                                    <p class="text-xs text-gray-500 mb-1">Preview:</p>
+                                    <div class="text-xs max-h-20 overflow-y-auto">
+                                        ${activeMetadata.keywords.map(k => `<span class="keyword-pill">${k}</span>`).join('')}
+                                    </div>
                                 </div>
                             ` : ''}
-                        </div>
-
-                        <!-- Optimization Section -->
-                        <div class="pt-4 mt-4 border-t border-gray-200 space-y-3">
-                            <label class="block text-sm font-bold text-gray-800">Metadata Optimizations (Gemini LLM)</label>
-                            
-                            <button id="keywords-opt-btn-${id}" onclick="optimizeKeywords('${id}')" 
-                                class="w-full text-sm font-semibold bg-indigo-100 text-indigo-700 py-2 rounded-lg hover:bg-indigo-200 transition duration-150 disabled:opacity-50 flex items-center justify-center">
-                                ✨ Get 10 Long-Tail Keywords
-                            </button>
-
-                            <div id="extra-keywords-display-${id}" class="bg-white p-2 rounded-lg border border-dashed border-indigo-300 ${extras.keywords.length > 0 ? '' : 'hidden'}">
-                                <p class="text-xs font-semibold text-indigo-700 mb-1">Suggested Long-Tail Keywords:</p>
-                                <div class="text-xs">${extras.keywords.map(tag => `<span class="keyword-pill keyword-extra">${tag}</span>`).join('')}</div>
-                            </div>
-                            
-                            <button id="titles-opt-btn-${id}" onclick="optimizeTitles('${id}')" 
-                                class="w-full text-sm font-semibold bg-indigo-100 text-indigo-700 py-2 rounded-lg hover:bg-indigo-200 transition duration-150 disabled:opacity-50 flex items-center justify-center">
-                                ✨ Suggest 3 Title Alternatives
-                            </button>
-
-                            <div id="alt-titles-display-${id}" class="bg-white p-3 rounded-lg border border-dashed border-indigo-300 space-y-1 ${extras.titles.length > 0 ? '' : 'hidden'}">
-                                <p class="text-xs font-semibold text-indigo-700 mb-2">Alternative Title Suggestions:</p>
-                                ${alternativeTitlesList}
-                            </div>
-
                         </div>
 
                     </div>
@@ -1487,11 +1491,6 @@
             
             elements.clearBtn.disabled = state.files.length === 0;
 
-            const completedCount = state.results.filter(r => r.status === 'complete').length;
-            elements.downloadReadyCount.textContent = completedCount;
-            elements.downloadZipBtn.disabled = completedCount === 0;
-            elements.downloadCsvBtn.disabled = completedCount === 0;
-
             if (state.results.length === 0) {
                 elements.initialOutputPlaceholder.classList.remove('hidden');
             } else {
@@ -1500,6 +1499,8 @@
                     elements.resultsContainer.insertAdjacentHTML('beforeend', createResultHtml(result));
                 });
             }
+            
+            updateDownloadButtons();
         }
 
         window.copyDynamicToClipboard = function(elementId, button) {
@@ -1535,11 +1536,6 @@
                 button.innerHTML = `<svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
                 setTimeout(() => {
                     button.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3"></path></svg>`;
-                    if(button.id && button.id.startsWith('keywords-opt-btn')) {
-                         button.innerHTML = '✨ Get 10 Long-Tail Keywords';
-                    } else if (button.id && button.id.startsWith('titles-opt-btn')) {
-                         button.innerHTML = '✨ Suggest 3 Title Alternatives';
-                    }
                 }, 1500);
 
             } catch (err) {
@@ -1575,6 +1571,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             renderOutput();
+            updatePlatformSelection(); // Initialize platform state
         });
     </script>
 </body>
