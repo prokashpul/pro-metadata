@@ -322,6 +322,103 @@
             font-weight: 600;
         }
         
+        /* Keyword count styles */
+        .keyword-count-warning {
+            color: #dc2626;
+            font-weight: 600;
+        }
+        
+        .keyword-count-success {
+            color: #16a34a;
+            font-weight: 600;
+        }
+        
+        .keyword-count-info {
+            color: #2563eb;
+            font-weight: 600;
+        }
+        
+        /* API Key Item Styles */
+        .api-key-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+        }
+        
+        body.dark-mode .api-key-item {
+            background-color: #0f172a;
+            border-color: #334155;
+        }
+        
+        .api-key-item:hover {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+        
+        body.dark-mode .api-key-item:hover {
+            background-color: #1e293b;
+            border-color: #475569;
+        }
+        
+        .api-key-text {
+            flex: 1;
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: #64748b;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        body.dark-mode .api-key-text {
+            color: #94a3b8;
+        }
+        
+        .btn-remove-key {
+            padding: 0.25rem 0.5rem;
+            background-color: #fee2e2;
+            color: #991b1b;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .btn-remove-key:hover {
+            background-color: #fecaca;
+        }
+        
+        body.dark-mode .btn-remove-key {
+            background-color: #7f1d1d;
+            color: #fee2e2;
+        }
+        
+        body.dark-mode .btn-remove-key:hover {
+            background-color: #991b1b;
+        }
+        
+        .key-pool-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            background-color: #dbeafe;
+            color: #1e40af;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        body.dark-mode .key-pool-badge {
+            background-color: #1e3a8a;
+            color: #dbeafe;
+        }
+        
         /* Text color adjustments for dark mode */
         body.dark-mode .text-gray-900 {
             color: #f1f5f9 !important;
@@ -451,8 +548,9 @@
                 <button onclick="showApiModal()" 
                     class="px-4 py-2 text-sm font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-150 flex items-center space-x-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.82 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.82 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.82-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.82-3.31 2.37-2.37.996.608 2.245.54 3.14-.078z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    <span class="hidden sm:inline">API Settings</span>
+                    <span class="hidden sm:inline">API Keys</span>
                     <span class="inline sm:hidden">API</span>
+                    <span id="keyPoolCount" class="key-pool-badge">0</span>
                 </button>
             </div>
         </div>
@@ -468,7 +566,7 @@
         </header>
 
 
-        <div class="grid grid-cols-1 lg:col-span-3 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
             <!-- UPLOAD AND CONTROLS (Left Column) -->
             <div class="lg:col-span-1 space-y-6">
@@ -496,17 +594,17 @@
                             <label class="flex items-center space-x-3 cursor-pointer p-2 rounded hover:bg-gray-100 transition">
                                 <input type="checkbox" id="platformAdobe" class="platform-checkbox" checked onchange="updatePlatformSelection()">
                                 <span class="platform-badge platform-adobe">Adobe Stock</span>
-                                <span class="text-xs text-gray-500 ml-auto">49 keywords | Title: 150-190 chars </span>
+                                <span class="text-xs text-gray-500 ml-auto">30-49 keywords | Title: 150-190 chars </span>
                             </label>
                             <label class="flex items-center space-x-3 cursor-pointer p-2 rounded hover:bg-gray-100 transition">
                                 <input type="checkbox" id="platformShutterstock" class="platform-checkbox" checked onchange="updatePlatformSelection()">
                                 <span class="platform-badge platform-shutterstock">Shutterstock</span>
-                                <span class="text-xs text-gray-500 ml-auto">50 keywords | Title: 145-200 chars </span>
+                                <span class="text-xs text-gray-500 ml-auto">30-50 keywords | Title: 145-200 chars </span>
                             </label>
                             <label class="flex items-center space-x-3 cursor-pointer p-2 rounded hover:bg-gray-100 transition">
                                 <input type="checkbox" id="platformFreepik" class="platform-checkbox" checked onchange="updatePlatformSelection()">
                                 <span class="platform-badge platform-freepik">Freepik</span>
-                                <span class="text-xs text-gray-500 ml-auto">50 keywords | Title: 75-100 chars</span>
+                                <span class="text-xs text-gray-500 ml-auto">30-50 keywords | Title: 75-100 chars</span>
                             </label>
                         </div>
                         <p id="platformWarning" class="text-xs text-amber-600 mt-2 hidden">⚠️ Please select at least one platform</p>
@@ -595,7 +693,7 @@
                         AI-powered batch metadata generation tool for Adobe Stock, Shutterstock, and Freepik. Platform-specific optimization with intelligent SEO suggestions.
                     </p>
                     <p class="text-xs text-gray-500">
-                        Version 2.0.0 | Updated 2025
+                        Version 2.1.0 | Updated 2025
                     </p>
                 </div>
 
@@ -603,7 +701,7 @@
                 <div class="space-y-3">
                     <h4 class="text-sm font-bold text-white uppercase tracking-wider">Powered By</h4>
                     <div class="flex flex-wrap">
-                        <span class="tech-badge">🤖 Google Gemini 2.5</span>
+                        <span class="tech-badge">🤖 Google Gemini 2.0</span>
                         <span class="tech-badge">⚡ Tailwind CSS</span>
                         <span class="tech-badge">📦 JSZip</span>
                         <span class="tech-badge">🎨 Inter Font</span>
@@ -660,38 +758,76 @@
     
     <!-- API KEY MODAL -->
     <div id="apiModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 invisible opacity-0">
-        <div class="card w-full max-w-lg p-6 sm:p-8 transform transition-all duration-300 scale-95">
+        <div class="card w-full max-w-2xl p-6 sm:p-8 transform transition-all duration-300 scale-95 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
-                <h3 class="text-2xl font-bold text-gray-900">API Settings</h3>
+                <h3 class="text-2xl font-bold text-gray-900">API Key Pool Management</h3>
                 <button onclick="hideApiModal()" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
 
-            <p class="text-sm text-gray-600 mb-4">
-                Enter your Google Gemini API key to enable metadata generation.
-            </p>
+            <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="flex items-start space-x-2">
+                    <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <div class="text-sm text-blue-800">
+                        <p class="font-semibold mb-1">Multi-Key Pool Benefits:</p>
+                        <ul class="list-disc list-inside space-y-1 text-xs">
+                            <li>Distribute API load across multiple keys</li>
+                            <li>Avoid rate limiting with automatic rotation</li>
+                            <li>Fallback protection if one key fails</li>
+                            <li>Keys are stored securely in your browser</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
 
-            <form id="apiForm" onsubmit="saveApiKeys(event)">
-                <div class="space-y-4">
-                    <label for="geminiApiKey" class="block text-sm font-medium text-gray-700">Gemini API Key</label>
-                    <input type="text" id="geminiApiKey" name="geminiApiKey" placeholder="AIzaSy..."
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            <!-- Add New Key Section -->
+            <div class="mb-6">
+                <h4 class="text-sm font-bold text-gray-700 mb-3">Add New Gemini API Key</h4>
+                <div class="flex gap-2">
+                    <input type="text" 
+                        id="newApiKeyInput" 
+                        placeholder="AIzaSy..." 
+                        class="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                    <button onclick="addApiKey()" 
+                        class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition duration-150 flex items-center space-x-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        <span>Add Key</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- API Key List -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-3">
+                    <h4 class="text-sm font-bold text-gray-700">Your API Keys (<span id="modalKeyCount">0</span>)</h4>
+                    <button onclick="clearAllKeys()" 
+                        class="text-xs text-red-600 hover:text-red-700 font-semibold flex items-center space-x-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        <span>Clear All</span>
+                    </button>
                 </div>
                 
-                <div id="apiStatusMessage" class="mt-4 text-xs font-medium text-center text-indigo-600">
-                    <!-- Status of the API key goes here -->
+                <div id="apiKeyList" class="space-y-2 max-h-64 overflow-y-auto">
+                    <p class="text-sm text-gray-400 italic text-center py-4">No API keys added yet.</p>
                 </div>
+            </div>
+            
+            <div id="apiStatusMessage" class="mt-4 text-xs font-medium text-center text-indigo-600">
+                <!-- Status messages appear here -->
+            </div>
 
-                <div class="mt-6 flex justify-end space-x-3">
-                    <button type="button" onclick="hideApiModal()" class="btn-secondary px-4 py-2 rounded-lg font-semibold">
-                        Cancel
-                    </button>
-                    <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition duration-150">
-                        Save Configuration
-                    </button>
-                </div>
-            </form>
+            <div class="mt-6 flex justify-between items-center pt-4 border-t">
+                <a href="https://aistudio.google.com/app/apikey" target="_blank" 
+                    class="text-xs text-indigo-600 hover:text-indigo-700 font-semibold flex items-center space-x-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    <span>Get Free API Key from Google</span>
+                </a>
+                <button type="button" onclick="hideApiModal()" 
+                    class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition duration-150">
+                    Done
+                </button>
+            </div>
         </div>
     </div>
     
@@ -738,77 +874,188 @@
                 titleMax: 190,
                 titleMin: 150,
                 descMax: 200,
+                keywordsMin: 30,
                 keywordsMax: 49,
-                systemPrompt: "You are a world-class Adobe Stock SEO expert. Generate metadata optimized for Adobe Stock's algorithm. Title must be 150-190 characters in Title Case (REQUIRED - strictly enforce this range). Description must be engaging (max 200 chars). Generate exactly 49 unique, high-value, commercially relevant keywords."
+                systemPrompt: "You are a world-class Adobe Stock SEO expert. Generate metadata optimized for Adobe Stock's algorithm. Title must be 150-190 characters in Title Case (REQUIRED - strictly enforce this range). Description must be engaging (max 200 chars). Generate EXACTLY between 30-49 unique, high-value, commercially relevant keywords. CRITICAL: You MUST generate at least 30 keywords minimum."
             },
             shutterstock: {
                 name: 'Shutterstock',
                 titleMax: 200,
                 titleMin: 145,
                 descMax: 200,
+                keywordsMin: 30,
                 keywordsMax: 50,
-                systemPrompt: "You are a Shutterstock SEO specialist. Generate metadata optimized for Shutterstock's search algorithm. Title must be 145-200 characters in Title Case (REQUIRED - strictly enforce this range). Description must be detailed (max 200 chars). Generate exactly 50 unique, relevant keywords with mix of broad and specific terms."
+                systemPrompt: "You are a Shutterstock SEO specialist. Generate metadata optimized for Shutterstock's search algorithm. Title must be 145-200 characters in Title Case (REQUIRED - strictly enforce this range). Description must be detailed (max 200 chars). Generate EXACTLY between 30-50 unique, relevant keywords with mix of broad and specific terms. CRITICAL: You MUST generate at least 30 keywords minimum."
             },
             freepik: {
                 name: 'Freepik',
                 titleMax: 100,
                 titleMin: 75,
                 descMax: 200,
+                keywordsMin: 30,
                 keywordsMax: 50,
-                systemPrompt: "You are a Freepik content optimization expert. Generate metadata for Freepik's platform. Title must be 75-100 characters in Title Case (REQUIRED - strictly enforce this range). Description must be informative (max 200 chars). Generate exactly 50 unique keywords focusing on style, theme, and usage."
+                systemPrompt: "You are a Freepik content optimization expert. Generate metadata for Freepik's platform. Title must be 75-100 characters in Title Case (REQUIRED - strictly enforce this range). Description must be informative (max 200 chars). Generate EXACTLY between 30-50 unique keywords focusing on style, theme, and usage. CRITICAL: You MUST generate at least 30 keywords minimum."
             }
         };
         
-        // --- Core Application Logic & State ---
-        const MAX_RETRIES = 3;
-
-        const GEMINI_API_KEY_STORAGE = 'multiPlatformStock_geminiKey';
-
+        // --- API Key Pool Management ---
+        const API_KEY_POOL_STORAGE = 'multiPlatformStock_apiKeyPool';
+        
         const state = {
             files: [],
-            results: [], // Each result will have metadata for multiple platforms
+            results: [],
             maxFiles: 25,
-            userApiKey: localStorage.getItem(GEMINI_API_KEY_STORAGE) || '',
-            selectedPlatforms: ['adobe', 'shutterstock', 'freepik'] // Default all selected
+            apiKeyPool: [],
+            currentKeyIndex: 0,
+            selectedPlatforms: ['adobe', 'shutterstock', 'freepik']
         };
         
-        function getApiKey() {
-            return state.userApiKey || ""; 
+        // Load API keys from localStorage
+        function loadApiKeyPool() {
+            try {
+                const saved = localStorage.getItem(API_KEY_POOL_STORAGE);
+                if (saved) {
+                    state.apiKeyPool = JSON.parse(saved);
+                }
+            } catch (e) {
+                console.error('Failed to load API key pool:', e);
+                state.apiKeyPool = [];
+            }
+            updateKeyPoolDisplay();
         }
         
-        // --- Platform Selection ---
-        window.updatePlatformSelection = function() {
-            const adobe = document.getElementById('platformAdobe').checked;
-            const shutterstock = document.getElementById('platformShutterstock').checked;
-            const freepik = document.getElementById('platformFreepik').checked;
-            
-            state.selectedPlatforms = [];
-            if (adobe) state.selectedPlatforms.push('adobe');
-            if (shutterstock) state.selectedPlatforms.push('shutterstock');
-            if (freepik) state.selectedPlatforms.push('freepik');
-            
-            const warning = document.getElementById('platformWarning');
-            if (state.selectedPlatforms.length === 0) {
-                warning.classList.remove('hidden');
-                document.getElementById('analyzeBtn').disabled = true;
-            } else {
-                warning.classList.add('hidden');
-                if (state.files.length > 0) {
-                    document.getElementById('analyzeBtn').disabled = false;
-                }
+        // Save API keys to localStorage
+        function saveApiKeyPool() {
+            try {
+                localStorage.setItem(API_KEY_POOL_STORAGE, JSON.stringify(state.apiKeyPool));
+                updateKeyPoolDisplay();
+            } catch (e) {
+                console.error('Failed to save API key pool:', e);
+                showStatus('Failed to save API keys', 'error');
+            }
+        }
+        
+        // Get next API key from pool (round-robin)
+        function getNextApiKey() {
+            if (state.apiKeyPool.length === 0) {
+                throw new Error('No API keys configured. Please add at least one API key.');
             }
             
-            updateDownloadButtons();
+            const key = state.apiKeyPool[state.currentKeyIndex];
+            state.currentKeyIndex = (state.currentKeyIndex + 1) % state.apiKeyPool.length;
+            
+            return key;
         }
         
-        function updateDownloadButtons() {
-            const completedCount = state.results.filter(r => r.status === 'complete').length;
+        // Add new API key to pool
+        window.addApiKey = function() {
+            const input = document.getElementById('newApiKeyInput');
+            const newKey = input.value.trim();
             
-            document.getElementById('downloadZipAdobe').disabled = !state.selectedPlatforms.includes('adobe') || completedCount === 0;
-            document.getElementById('downloadZipShutterstock').disabled = !state.selectedPlatforms.includes('shutterstock') || completedCount === 0;
-            document.getElementById('downloadZipFreepik').disabled = !state.selectedPlatforms.includes('freepik') || completedCount === 0;
-            document.getElementById('downloadCsvAll').disabled = completedCount === 0;
+            if (!newKey) {
+                showApiStatus('Please enter an API key', 'error');
+                return;
+            }
+            
+            if (newKey.length < 20) {
+                showApiStatus('API key looks too short. Please check it.', 'error');
+                return;
+            }
+            
+            if (state.apiKeyPool.includes(newKey)) {
+                showApiStatus('This key is already in your pool', 'error');
+                return;
+            }
+            
+            state.apiKeyPool.push(newKey);
+            saveApiKeyPool();
+            renderApiKeyList();
+            
+            input.value = '';
+            showApiStatus(`Key added! Pool now has ${state.apiKeyPool.length} key(s)`, 'success');
         }
+        
+        // Remove API key from pool
+        window.removeApiKey = function(index) {
+            if (confirm('Remove this API key from the pool?')) {
+                state.apiKeyPool.splice(index, 1);
+                saveApiKeyPool();
+                renderApiKeyList();
+                showApiStatus('Key removed from pool', 'success');
+            }
+        }
+        
+        // Clear all API keys
+        window.clearAllKeys = function() {
+            if (confirm(`Remove all ${state.apiKeyPool.length} API keys from the pool?`)) {
+                state.apiKeyPool = [];
+                saveApiKeyPool();
+                renderApiKeyList();
+                showApiStatus('All keys cleared', 'success');
+            }
+        }
+        
+        // Render API key list in modal
+        function renderApiKeyList() {
+            const container = document.getElementById('apiKeyList');
+            const countEl = document.getElementById('modalKeyCount');
+            
+            countEl.textContent = state.apiKeyPool.length;
+            
+            if (state.apiKeyPool.length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-400 italic text-center py-4">No API keys added yet.</p>';
+                return;
+            }
+            
+            container.innerHTML = state.apiKeyPool.map((key, index) => {
+                const maskedKey = `${key.substring(0, 12)}...${key.substring(key.length - 4)}`;
+                return `
+                    <div class="api-key-item">
+                        <span class="text-xs font-semibold text-gray-500">#${index + 1}</span>
+                        <span class="api-key-text">${maskedKey}</span>
+                        <button onclick="removeApiKey(${index})" class="btn-remove-key">
+                            Remove
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Update key pool count badge
+        function updateKeyPoolDisplay() {
+            const badge = document.getElementById('keyPoolCount');
+            badge.textContent = state.apiKeyPool.length;
+            
+            if (state.apiKeyPool.length === 0) {
+                badge.classList.add('bg-red-100', 'text-red-800');
+                badge.classList.remove('bg-blue-100', 'text-blue-800');
+            } else {
+                badge.classList.add('bg-blue-100', 'text-blue-800');
+                badge.classList.remove('bg-red-100', 'text-red-800');
+            }
+        }
+        
+        // Show status in modal
+        function showApiStatus(message, type) {
+            const statusEl = document.getElementById('apiStatusMessage');
+            statusEl.textContent = message;
+            statusEl.className = 'mt-4 text-xs font-medium text-center';
+            
+            if (type === 'success') {
+                statusEl.classList.add('text-green-600');
+            } else if (type === 'error') {
+                statusEl.classList.add('text-red-600');
+            } else {
+                statusEl.classList.add('text-indigo-600');
+            }
+            
+            setTimeout(() => {
+                statusEl.textContent = '';
+            }, 3000);
+        }
+        
+        // --- Core Application Logic ---
+        const MAX_RETRIES = 3;
 
         const elements = {
             fileInput: document.getElementById('fileInput'),
@@ -826,7 +1073,6 @@
             resultsCount: document.getElementById('resultsCount'),
             clearBtn: document.getElementById('clearBtn'), 
             apiModal: document.getElementById('apiModal'),
-            geminiApiKeyInput: document.getElementById('geminiApiKey'),
             apiStatusMessage: document.getElementById('apiStatusMessage'),
         };
 
@@ -838,18 +1084,17 @@
                 if (field === 'keywords') {
                     const keywords = value.split(',').map(k => k.trim().toLowerCase()).filter(k => k.length > 0);
                     resultItem.platformMetadata[platform].keywords = [...new Set(keywords)];
+                    updateKeywordCount(id, platform);
                 } else {
                     resultItem.platformMetadata[platform][field] = value;
                 }
                 
-                // Update character count display
                 if (field === 'title') {
                     updateCharacterCount(id, platform);
                 }
             }
         }
         
-        // Function to update character count and warning
         function updateCharacterCount(id, platform) {
             const config = PLATFORM_CONFIGS[platform];
             const inputElement = document.getElementById(`title-input-${id}-${platform}`);
@@ -870,11 +1115,36 @@
                 }
             }
         }
+        
+        // New function to update keyword count
+        function updateKeywordCount(id, platform) {
+            const config = PLATFORM_CONFIGS[platform];
+            const countElement = document.getElementById(`keyword-count-${id}-${platform}`);
+            const resultItem = state.results.find(r => r.id === id);
+            
+            if (countElement && resultItem && resultItem.platformMetadata[platform]) {
+                const count = resultItem.platformMetadata[platform].keywords.length;
+                const isValid = count >= config.keywordsMin && count <= config.keywordsMax;
+                const isBelowMin = count < config.keywordsMin;
+                
+                countElement.textContent = `${count}/${config.keywordsMax} keywords (Min: ${config.keywordsMin})`;
+                
+                // Remove all classes first
+                countElement.classList.remove('keyword-count-warning', 'keyword-count-success', 'keyword-count-info');
+                
+                if (isBelowMin) {
+                    countElement.classList.add('keyword-count-warning');
+                } else if (isValid) {
+                    countElement.classList.add('keyword-count-success');
+                } else {
+                    countElement.classList.add('keyword-count-info');
+                }
+            }
+        }
 
         // --- API Modal Functions ---
         window.showApiModal = function() {
-            elements.geminiApiKeyInput.value = state.userApiKey;
-            elements.apiStatusMessage.textContent = state.userApiKey ? "Using custom API key." : "Using default environment key.";
+            renderApiKeyList();
             elements.apiModal.classList.remove('invisible', 'opacity-0');
             elements.apiModal.classList.add('opacity-100');
         }
@@ -882,29 +1152,6 @@
         window.hideApiModal = function() {
             elements.apiModal.classList.remove('opacity-100');
             elements.apiModal.classList.add('invisible', 'opacity-0');
-        }
-
-        window.saveApiKeys = function(event) {
-            event.preventDefault();
-            const newKey = elements.geminiApiKeyInput.value.trim();
-            
-            if (newKey && newKey.length < 20) {
-                 elements.apiStatusMessage.textContent = "Key looks too short. Please check it.";
-                 return;
-            }
-
-            state.userApiKey = newKey;
-            localStorage.setItem(GEMINI_API_KEY_STORAGE, newKey);
-            
-            if (newKey) {
-                 elements.apiStatusMessage.textContent = "Gemini API key saved successfully!";
-                 showStatus('Custom Gemini API key saved.', 'success');
-            } else {
-                 elements.apiStatusMessage.textContent = "Switched back to using the default environment key.";
-                 showStatus('Switched to default API key.', 'info');
-            }
-            
-            setTimeout(hideApiModal, 1000);
         }
 
         // --- Utility Functions ---
@@ -973,6 +1220,40 @@
             renderOutput();
         }
 
+        // --- Platform Selection ---
+        window.updatePlatformSelection = function() {
+            const adobe = document.getElementById('platformAdobe').checked;
+            const shutterstock = document.getElementById('platformShutterstock').checked;
+            const freepik = document.getElementById('platformFreepik').checked;
+            
+            state.selectedPlatforms = [];
+            if (adobe) state.selectedPlatforms.push('adobe');
+            if (shutterstock) state.selectedPlatforms.push('shutterstock');
+            if (freepik) state.selectedPlatforms.push('freepik');
+            
+            const warning = document.getElementById('platformWarning');
+            if (state.selectedPlatforms.length === 0) {
+                warning.classList.remove('hidden');
+                document.getElementById('analyzeBtn').disabled = true;
+            } else {
+                warning.classList.add('hidden');
+                if (state.files.length > 0 && state.apiKeyPool.length > 0) {
+                    document.getElementById('analyzeBtn').disabled = false;
+                }
+            }
+            
+            updateDownloadButtons();
+        }
+        
+        function updateDownloadButtons() {
+            const completedCount = state.results.filter(r => r.status === 'complete').length;
+            
+            document.getElementById('downloadZipAdobe').disabled = !state.selectedPlatforms.includes('adobe') || completedCount === 0;
+            document.getElementById('downloadZipShutterstock').disabled = !state.selectedPlatforms.includes('shutterstock') || completedCount === 0;
+            document.getElementById('downloadZipFreepik').disabled = !state.selectedPlatforms.includes('freepik') || completedCount === 0;
+            document.getElementById('downloadCsvAll').disabled = completedCount === 0;
+        }
+
         window.handleFileChange = async function(input) {
             if (input.files.length === 0) {
                 elements.fileNameDisplay.textContent = 'Click or drag files here (Max 25)';
@@ -989,31 +1270,31 @@
             const filePromises = selectedFiles.map(async (file) => ({
                 file,
                 status: 'pending',
-                platformMetadata: {}, // Will hold metadata for each platform
+                platformMetadata: {},
                 id: crypto.randomUUID(),
                 thumbnail: await getThumbnailData(file),
-                activePlatform: state.selectedPlatforms[0] || 'adobe' // Default active tab
+                activePlatform: state.selectedPlatforms[0] || 'adobe'
             }));
 
             state.results = await Promise.all(filePromises);
 
             elements.fileNameDisplay.textContent = `${state.files.length} file(s) selected.`;
             elements.filePreviewText.textContent = `Ready to process ${state.files.length} file(s).`;
-            elements.analyzeBtn.disabled = state.selectedPlatforms.length === 0;
+            elements.analyzeBtn.disabled = state.selectedPlatforms.length === 0 || state.apiKeyPool.length === 0;
             elements.clearBtn.disabled = false;
-            elements.analysisMethod.textContent = `Batch mode for ${state.selectedPlatforms.length} platform(s). Processing ${state.files.length} file(s).`;
+            elements.analysisMethod.textContent = `Batch mode for ${state.selectedPlatforms.length} platform(s). Processing ${state.files.length} file(s). Using ${state.apiKeyPool.length} API key(s).`;
 
             renderOutput();
         }
 
         async function callGeminiApiWithBackoff(payload, attempt = 0) {
-            const currentKey = getApiKey();
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${currentKey}`;
-            
-            const delay = Math.pow(2, attempt) * 1000 + Math.random() * 500;
-            if (attempt > 0) await new Promise(resolve => setTimeout(resolve, delay));
-
             try {
+                const currentKey = getNextApiKey();
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${currentKey}`;
+                
+                const delay = Math.pow(2, attempt) * 1000 + Math.random() * 500;
+                if (attempt > 0) await new Promise(resolve => setTimeout(resolve, delay));
+
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1057,7 +1338,7 @@
                 }
             }
 
-            const userQuery = `Generate ${config.name} metadata for this asset (File Type: ${isImage ? 'Image' : extension.toUpperCase()}, Filename: ${file.name}). Focus on commercial value and searchability specific to ${config.name}'s platform. IMPORTANT: Title MUST be between ${config.titleMin}-${config.titleMax} characters.`;
+            const userQuery = `Generate ${config.name} metadata for this asset (File Type: ${isImage ? 'Image' : extension.toUpperCase()}, Filename: ${file.name}). Focus on commercial value and searchability specific to ${config.name}'s platform. IMPORTANT: Title MUST be between ${config.titleMin}-${config.titleMax} characters. CRITICAL: Generate AT LEAST ${config.keywordsMin} keywords (minimum requirement).`;
 
             const metadataSchema = {
                 type: "OBJECT",
@@ -1100,12 +1381,9 @@
 
             const parsedJson = JSON.parse(jsonText);
 
-            // Ensure title meets minimum length requirement
             let title = parsedJson.title || file.name.substring(0, file.name.lastIndexOf('.'));
             
-            // If title is too short, pad it; if too long, truncate it
             if (title.length < config.titleMin) {
-                // Pad with descriptive text to meet minimum
                 const padding = ` - High Quality Stock Content for Commercial Use`;
                 title = (title + padding).slice(0, config.titleMax);
             } else if (title.length > config.titleMax) {
@@ -1116,13 +1394,41 @@
             
             let rawKeywords = Array.isArray(parsedJson.keywords) ? parsedJson.keywords : [];
             rawKeywords = rawKeywords.flatMap(k => k.includes(',') ? k.split(',').map(s => s.trim()) : [k.trim()]);
-            const keywords = [...new Set(rawKeywords.filter(k => k.length > 0).map(k => k.toLowerCase()))].slice(0, config.keywordsMax);
+            let keywords = [...new Set(rawKeywords.filter(k => k.length > 0).map(k => k.toLowerCase()))];
+            
+            // Ensure minimum keyword count
+            if (keywords.length < config.keywordsMin) {
+                console.warn(`Only ${keywords.length} keywords generated for ${platform}, padding to minimum ${config.keywordsMin}`);
+                // Add generic but relevant keywords to meet minimum
+                const genericKeywords = [
+                    'professional', 'quality', 'design', 'creative', 'digital',
+                    'modern', 'business', 'concept', 'style', 'background',
+                    'illustration', 'graphic', 'element', 'template', 'layout',
+                    'visual', 'content', 'media', 'image', 'stock'
+                ];
+                
+                for (const gk of genericKeywords) {
+                    if (keywords.length >= config.keywordsMin) break;
+                    if (!keywords.includes(gk)) {
+                        keywords.push(gk);
+                    }
+                }
+            }
+            
+            // Limit to max
+            keywords = keywords.slice(0, config.keywordsMax);
             
             return { title, description, keywords };
         }
         
         window.generateMetadata = async function() {
             if (state.files.length === 0 || state.selectedPlatforms.length === 0) return;
+            
+            if (state.apiKeyPool.length === 0) {
+                showStatus('Please add at least one API key before generating metadata.', 'error');
+                showApiModal();
+                return;
+            }
 
             elements.analyzeBtn.disabled = true;
             elements.clearBtn.disabled = true;
@@ -1138,7 +1444,6 @@
                 renderOutput();
 
                 try {
-                    // Generate metadata for each selected platform
                     for (const platform of state.selectedPlatforms) {
                         elements.analyzeText.textContent = `Analyzing ${i + 1}/${state.files.length} - ${PLATFORM_CONFIGS[platform].name}...`;
                         
@@ -1152,7 +1457,6 @@
                     console.error(`Error processing ${file.name}:`, error);
                     resultItem.status = 'error';
                     
-                    // Set error metadata for all selected platforms
                     state.selectedPlatforms.forEach(platform => {
                         resultItem.platformMetadata[platform] = {
                             title: `ERROR: ${file.name}`,
@@ -1241,7 +1545,6 @@
             const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
 
             if (mode === 'all') {
-                // Create separate CSV for each platform
                 state.selectedPlatforms.forEach(platform => {
                     const config = PLATFORM_CONFIGS[platform];
                     const headers = ['Filename', 'Title', 'Description', 'Keywords']; 
@@ -1309,7 +1612,7 @@
             }
         }
 
-        // --- UI RENDERING AND INTERACTIONS ---
+        // --- UI RENDERING ---
         
         window.toggleResult = function(id) {
             const content = document.getElementById(`content-${id}`);
@@ -1358,7 +1661,6 @@
                 />
             `;
 
-            // Platform tabs
             const platformTabs = state.selectedPlatforms.map(platform => {
                 const isActive = platform === activePlatform;
                 const badgeClass = `platform-${platform}`;
@@ -1370,14 +1672,17 @@
                 `;
             }).join('');
 
-            // Get active platform metadata
             const activeMetadata = platformMetadata[activePlatform] || { title: '', description: '', keywords: [] };
             const config = PLATFORM_CONFIGS[activePlatform] || PLATFORM_CONFIGS.adobe;
             
-            // Check if title meets requirements
             const titleLength = activeMetadata.title.length;
             const isTitleValid = titleLength >= config.titleMin && titleLength <= config.titleMax;
             const charCountClass = isTitleValid ? 'char-success' : 'char-warning';
+            
+            const keywordCount = activeMetadata.keywords.length;
+            const isKeywordValid = keywordCount >= config.keywordsMin && keywordCount <= config.keywordsMax;
+            const isBelowMin = keywordCount < config.keywordsMin;
+            const keywordCountClass = isBelowMin ? 'keyword-count-warning' : (isKeywordValid ? 'keyword-count-success' : 'keyword-count-info');
 
             return `
                 <div id="result-${id}" class="result-item ${bgColor} p-4 rounded-lg border border-200 shadow-sm transition-all duration-300">
@@ -1400,13 +1705,11 @@
                     <div id="content-${id}" class="mt-4 space-y-4 ${isExpanded ? '' : 'hidden'}">
                         
                         ${state.selectedPlatforms.length > 1 ? `
-                            <!-- Platform Tabs -->
                             <div class="flex border-b border-gray-200">
                                 ${platformTabs}
                             </div>
                         ` : ''}
 
-                        <!-- Editable Title -->
                         <div class="bg-white p-3 rounded-lg border border-gray-200">
                             <div class="flex justify-between items-center mb-1">
                                 <label class="block text-xs font-semibold text-gray-500">Title for ${config.name} </label>
@@ -1428,7 +1731,6 @@
                             <p id="char-count-${id}-${activePlatform}" class="text-xs mt-1 ${charCountClass}">${titleLength}/${config.titleMax} characters (Required: ${config.titleMin}-${config.titleMax})</p>
                         </div>
 
-                        <!-- Editable Description -->
                         <div class="bg-white p-3 rounded-lg border border-gray-200">
                             <div class="flex justify-between items-center mb-1">
                                 <label class="block text-xs font-semibold text-gray-500">Description for ${config.name}</label>
@@ -1449,16 +1751,19 @@
                             <p class="text-xs text-gray-400 mt-1">${activeMetadata.description.length}/${config.descMax} characters</p>
                         </div>
 
-                        <!-- Editable Keywords -->
                         <div class="bg-white p-3 rounded-lg border border-gray-200">
                             <div class="flex justify-between items-center mb-1">
-                                <label class="block text-xs font-semibold text-gray-500">Keywords for ${config.name} (${activeMetadata.keywords.length}/${config.keywordsMax})</label>
+                                <label class="block text-xs font-semibold text-gray-500">Keywords for ${config.name}</label>
                                 <span class="edit-indicator">✎ Editable</span>
                             </div>
+                            <p id="keyword-count-${id}-${activePlatform}" class="text-xs mb-2 ${keywordCountClass}">
+                                ${keywordCount}/${config.keywordsMax} keywords (Min: ${config.keywordsMin})
+                                ${isBelowMin ? ' ⚠️ Below minimum!' : ''}
+                            </p>
                             <div class="relative">
                                 <textarea 
                                     id="keywords-input-${id}-${activePlatform}"
-                                    onchange="updateMetadata('${id}', '${activePlatform}', 'keywords', this.value)"
+                                    oninput="updateMetadata('${id}', '${activePlatform}', 'keywords', this.value)"
                                     class="editable-textarea w-full text-sm text-gray-800 pr-12 px-2 py-1 border border-gray-200 rounded resize-none focus:ring-2 focus:ring-indigo-500"
                                     rows="3"
                                     placeholder="Enter keywords separated by commas"
@@ -1469,7 +1774,6 @@
                             </div>
                             <p class="text-xs text-gray-400 mt-1">Comma-separated tags</p>
                             
-                            <!-- Visual keyword pills display -->
                             ${activeMetadata.keywords.length > 0 ? `
                                 <div class="mt-2 pt-2 border-t border-gray-100">
                                     <p class="text-xs text-gray-500 mb-1">Preview:</p>
@@ -1546,7 +1850,6 @@
             }
         }
 
-
         function showStatus(message, type) {
             elements.statusMessage.textContent = message;
             elements.statusMessage.classList.remove('hidden', 'opacity-0', 'bg-red-500', 'bg-gray-800', 'bg-green-600');
@@ -1569,9 +1872,11 @@
             }, 3000);
         }
 
+        // Initialize on page load
         document.addEventListener('DOMContentLoaded', () => {
+            loadApiKeyPool();
             renderOutput();
-            updatePlatformSelection(); // Initialize platform state
+            updatePlatformSelection();
         });
     </script>
 </body>
