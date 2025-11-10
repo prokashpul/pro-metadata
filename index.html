@@ -1627,7 +1627,7 @@ KEYWORDS REQUIREMENTS (CRITICAL):
         async function callGeminiApiWithBackoff(payload, attempt = 0) {
             try {
                 const currentKey = getNextApiKey();
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${currentKey}`;
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${currentKey}`;
                 
                 const delay = Math.pow(2, attempt) * 500 + Math.random() * 300;
                 if (attempt > 0) await new Promise(resolve => setTimeout(resolve, delay));
